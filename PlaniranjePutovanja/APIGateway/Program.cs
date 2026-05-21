@@ -20,7 +20,7 @@ namespace APIGateway
                 // When Service Fabric creates an instance of this service type,
                 // an instance of the class is created in this host process.
 
-                ServiceRuntime.RegisterServiceAsync("APIGatewayType",
+                ServiceRuntime.RegisterServiceAsync("PlaniranjePutovanja.APIGatewayType",
                     context => new APIGateway(context)).GetAwaiter().GetResult();
 
                 ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(APIGateway).Name);

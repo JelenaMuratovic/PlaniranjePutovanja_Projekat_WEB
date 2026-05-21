@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Settings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/2011/01/fabric">
+  <!-- Add your custom configuration sections and parameters here -->
+  <!--
+  <Section Name="MyConfigSection">
+    <Parameter Name="MyParameter" Value="Value1" />
+  </Section>
+  -->
+	<Section Name="DatabaseConfiguration">
+		<Parameter Name="ConnectionString" Value="Server=localhost\SQLEXPRESS;Database=TravelPlanner_AuthDB;Trusted_Connection=True;TrustServerCertificate=True;" />
+	</Section>
+	<Section Name="SecurityConfiguration">
+		<Parameter Name="PasswordHashingIterations" Value="100000" />
+		<Parameter Name="PasswordSaltSize" Value="16" />
+		<Parameter Name="PasswordHashSize" Value="32" />
+		<Parameter Name="JwtSecretKey" Value="your-super-secret-key-minimum-32-characters-long-for-sha256-hmac!" />
+		<Parameter Name="JwtIssuer" Value="PlaniranjePutovanja" />
+		<Parameter Name="JwtAudience" Value="PlaniranjePutovanja.Client" />
+		<Parameter Name="JwtExpirationMinutes" Value="60" />
+	</Section>
+</Settings>

@@ -36,9 +36,10 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\APIGateway\APIGateway.csproj">
+    <ProjectReference Include="..\APIGateway\PlaniranjePutovanja.APIGateway.csproj">
       <ServiceLaunchUrl>http://localhost:{ServicePort}/swagger</ServiceLaunchUrl>
     </ProjectReference>
+    <ProjectReference Include="..\PlaniranjePutovanja.AuthService\PlaniranjePutovanja.AuthService.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
   <PropertyGroup>
