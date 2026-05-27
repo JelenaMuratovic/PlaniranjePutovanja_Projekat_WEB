@@ -76,5 +76,12 @@ namespace PlaniranjePutovanja.AuthService.DependencyInjection
             services.AddSingleton<IValidator<LoginRequestDto>, LoginRequestDtoValidator>();
             return services;
         }
+
+        public static IServiceCollection AddAuthClients(this IServiceCollection services)
+        {
+            services.AddSingleton<Clients.ITravelServiceClient, Clients.TravelServiceClient>();
+            services.AddSingleton<Clients.IExpenseServiceClient, Clients.ExpenseServiceClient>();
+            return services;
+        }
     }
 }

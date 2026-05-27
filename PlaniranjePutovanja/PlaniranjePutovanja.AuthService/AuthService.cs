@@ -27,10 +27,6 @@ namespace PlaniranjePutovanja.AuthService
         {
             _scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
         }
-
-        /// <summary>
-        /// Registracija novog korisnika
-        /// </summary>
         public async Task<AuthResponseDto> RegisterUserAsync(RegisterRequestDto request)
         {
             using var scope = _scopeFactory.CreateScope();
@@ -38,16 +34,26 @@ namespace PlaniranjePutovanja.AuthService
 
             return await businessService.RegisterUserAsync(request);
         }
-
-        /// <summary>
-        /// Prijava korisnika
-        /// </summary>
         public async Task<AuthResponseDto> LoginUserAsync(LoginRequestDto request)
         {
             using var scope = _scopeFactory.CreateScope();
             var businessService = scope.ServiceProvider.GetRequiredService<IAuthBusinessService>();
 
             return await businessService.LoginAsync(request);
+        }
+
+        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var businessService = scope.ServiceProvider.GetRequiredService<IAuthBusinessService>();
+            return await businessService.GetAllUsersAsync();
+        }
+
+        public async Task<bool> DeleteUserAsync(string userId)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var businessService = scope.ServiceProvider.GetRequiredService<IAuthBusinessService>();
+            return await businessService.DeleteUserAsync(userId);
         }
 
         /// <summary>

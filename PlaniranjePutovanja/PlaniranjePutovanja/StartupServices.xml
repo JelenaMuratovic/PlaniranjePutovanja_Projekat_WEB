@@ -1,6 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <StartupServicesManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/2011/01/fabric">
   <Parameters>
+    <Parameter Name="PlaniranjePutovanja.UtilService_InstanceCount" DefaultValue="-1" />
+    <Parameter Name="PlaniranjePutovanja.ExpenseService_MinReplicaSetSize" DefaultValue="3" />
+    <Parameter Name="PlaniranjePutovanja.ExpenseService_PartitionCount" DefaultValue="1" />
+    <Parameter Name="PlaniranjePutovanja.ExpenseService_TargetReplicaSetSize" DefaultValue="3" />
+    <Parameter Name="PlaniranjePutovanja.TravelService_InstanceCount" DefaultValue="-1" />
     <Parameter Name="PlaniranjePutovanja.AuthService_InstanceCount" DefaultValue="-1" />
     <Parameter Name="PlaniranjePutovanja_APIGateway_InstanceCount" DefaultValue="-1" />
   </Parameters>
@@ -10,6 +15,21 @@
          ServiceFabric PowerShell module.
 
          The attribute ServiceTypeName below must match the name defined in the imported ServiceManifest.xml file. -->
+    <Service Name="PlaniranjePutovanja.UtilService" ServicePackageActivationMode="ExclusiveProcess">
+      <StatelessService ServiceTypeName="PlaniranjePutovanja.UtilServiceType" InstanceCount="[PlaniranjePutovanja.UtilService_InstanceCount]">
+        <SingletonPartition />
+      </StatelessService>
+    </Service>
+    <Service Name="PlaniranjePutovanja.ExpenseService" ServicePackageActivationMode="ExclusiveProcess">
+      <StatefulService ServiceTypeName="PlaniranjePutovanja.ExpenseServiceType" TargetReplicaSetSize="[PlaniranjePutovanja.ExpenseService_TargetReplicaSetSize]" MinReplicaSetSize="[PlaniranjePutovanja.ExpenseService_MinReplicaSetSize]">
+        <UniformInt64Partition PartitionCount="[PlaniranjePutovanja.ExpenseService_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
+      </StatefulService>
+    </Service>
+    <Service Name="PlaniranjePutovanja.TravelService" ServicePackageActivationMode="ExclusiveProcess">
+      <StatelessService ServiceTypeName="PlaniranjePutovanja.TravelServiceType" InstanceCount="[PlaniranjePutovanja.TravelService_InstanceCount]">
+        <SingletonPartition />
+      </StatelessService>
+    </Service>
     <Service Name="PlaniranjePutovanja.AuthService" ServicePackageActivationMode="ExclusiveProcess">
       <StatelessService ServiceTypeName="PlaniranjePutovanja.AuthServiceType" InstanceCount="[PlaniranjePutovanja.AuthService_InstanceCount]">
         <SingletonPartition />

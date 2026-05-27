@@ -19,5 +19,14 @@ namespace PlaniranjePutovanja.Common.Interfaces.Auth
         /// Prijava korisnika
         /// </summary>
         Task<AuthResponseDto> LoginUserAsync(LoginRequestDto request);
+        /// <summary>
+        /// Admin akcija za prikaz svih korisnika
+        /// </summary>
+        Task<IEnumerable<UserDto>> GetAllUsersAsync();
+        /// <summary>
+        /// Admin akcija za brisanje korisnika
+        /// </summary>
+        /// <param name="userId"></param>
+        Task<bool> DeleteUserAsync(string userId);
     }
 }

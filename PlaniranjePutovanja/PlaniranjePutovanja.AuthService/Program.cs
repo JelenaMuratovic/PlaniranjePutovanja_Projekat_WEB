@@ -69,6 +69,7 @@ namespace PlaniranjePutovanja.AuthService
                         services.AddAuthPasswords(passwordHashingIterations, passwordSaltSize, passwordHashSize);
                         services.AddAuthJwt(jwtSecretKey, jwtIssuer, jwtAudience, jwtExpirationMinutes);
                         services.AddAuthValidators();
+                        services.AddAuthClients();
                         services.AddAuthServices();
 
                         IServiceProvider serviceProvider = services.BuildServiceProvider();

@@ -13,7 +13,7 @@
 		<Parameter Name="PasswordHashingIterations" Value="100000" />
 		<Parameter Name="PasswordSaltSize" Value="16" />
 		<Parameter Name="PasswordHashSize" Value="32" />
-		<Parameter Name="JwtSecretKey" Value="your-super-secret-key-minimum-32-characters-long-for-sha256-hmac!" />
+		<Parameter Name="JwtSecretKey" Value="NEKIMOJKAOSUPERJAKKLJUCZATOKENEIZMISLILASAMJE" />
 		<Parameter Name="JwtIssuer" Value="PlaniranjePutovanja" />
 		<Parameter Name="JwtAudience" Value="PlaniranjePutovanja.Client" />
 		<Parameter Name="JwtExpirationMinutes" Value="60" />

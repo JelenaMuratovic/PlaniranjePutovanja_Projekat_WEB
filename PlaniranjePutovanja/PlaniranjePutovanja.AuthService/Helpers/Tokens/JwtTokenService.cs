@@ -36,7 +36,7 @@ namespace PlaniranjePutovanja.AuthService.Helpers.Tokens
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
             new Claim(ClaimTypes.Role, user.Role.ToString())
-        };
+            };
 
             var token = new JwtSecurityToken(
                 issuer: _issuer,

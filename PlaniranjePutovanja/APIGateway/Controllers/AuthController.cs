@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.ServiceFabric.Services.Remoting.Client;
 using PlaniranjePutovanja.Common.DTOs.Auth;
@@ -11,10 +12,12 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
+        private readonly IAuthService _authService;
         private readonly ILogger<AuthController> _logger;
 
-        public AuthController(ILogger<AuthController> logger)
+        public AuthController(IAuthService authService, ILogger<AuthController> logger)
         {
+            _authService = authService;
             _logger = logger;
         }
 
@@ -23,10 +26,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
         {
             try
             {
-                var proxy = ServiceProxy.Create<IAuthService>(
-                    new Uri("fabric:/PlaniranjePutovanja/PlaniranjePutovanja.AuthService"));
-
-                var result = await proxy.RegisterUserAsync(request);
+                var result = await _authService.RegisterUserAsync(request);
 
                 if (result.IsSuccess)
                 {
@@ -38,7 +38,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Register failed.");
-                return StatusCode(500, $"Error: {ex.Message}, {ex.ToString()}");
+                return StatusCode(500, $"Error: {ex.Message}");
             }
         }
 
@@ -47,10 +47,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
         {
             try
             {
-                var proxy = ServiceProxy.Create<IAuthService>(
-                    new Uri("fabric:/PlaniranjePutovanja/PlaniranjePutovanja.AuthService"));
-
-                var result = await proxy.LoginUserAsync(request);
+                var result = await _authService.LoginUserAsync(request);
 
                 if (result.IsSuccess)
                 {
@@ -62,6 +59,43 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Login failed.");
+                return StatusCode(500, $"Error: {ex.Message}");
+            }
+        }
+
+        // Admin rute
+        [HttpGet("admin/users")]
+        [Authorize(Roles = "Admin")] 
+        public async Task<IActionResult> GetAllUsers()
+        {
+            try
+            {
+                var users = await _authService.GetAllUsersAsync();
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get all users.");
+                return StatusCode(500, $"Error: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("admin/users/{userId}")]
+        [Authorize(Roles = "Admin")] 
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            try
+            {
+                var result = await _authService.DeleteUserAsync(userId);
+                if (result)
+                {
+                    return NoContent();
+                }
+                return NotFound($"User with ID {userId} not found.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to delete user.");
                 return StatusCode(500, $"Error: {ex.Message}");
             }
         }

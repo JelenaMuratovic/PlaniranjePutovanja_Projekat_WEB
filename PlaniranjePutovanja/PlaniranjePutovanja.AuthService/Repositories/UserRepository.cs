@@ -47,5 +47,21 @@ namespace PlaniranjePutovanja.AuthService.Repositories
             _dbContext.Users.Update(user);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
+
+        public async Task<IEnumerable<User>> GetAllAsync()
+        {
+            return await _dbContext.Users.ToListAsync();
+        }
+
+        public async Task<bool> DeleteAsync(string id)
+        {
+            var user = await _dbContext.Users.FindAsync(id);
+            if (user == null)
+                return false;
+
+            _dbContext.Users.Remove(user);
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
     }
 }

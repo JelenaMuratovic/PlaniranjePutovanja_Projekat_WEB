@@ -16,5 +16,9 @@ namespace PlaniranjePutovanja.AuthService.Services
         Task<AuthResponseDto> LoginAsync(LoginRequestDto request, CancellationToken cancellationToken = default);
 
         //Task<UserDto?> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default);
+
+        Task<IEnumerable<UserDto>> GetAllUsersAsync();
+        
+        Task<bool> DeleteUserAsync(string userId);
     }
 }

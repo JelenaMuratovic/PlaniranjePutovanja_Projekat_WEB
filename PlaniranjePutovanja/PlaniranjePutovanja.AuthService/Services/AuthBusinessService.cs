@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using PlaniranjePutovanja.AuthService.Clients;
 using PlaniranjePutovanja.AuthService.Helpers.Passwords;
 using PlaniranjePutovanja.AuthService.Helpers.Tokens;
 using PlaniranjePutovanja.AuthService.Mappers;
@@ -22,6 +23,8 @@ namespace PlaniranjePutovanja.AuthService.Services
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IValidator<RegisterRequestDto> _registerValidator;
         private readonly IValidator<LoginRequestDto> _loginValidator;
+        private readonly ITravelServiceClient _travelServiceClient;
+        private readonly IExpenseServiceClient _expenseServiceClient;
 
         public AuthBusinessService(
         IUserRepository userRepository,
@@ -29,7 +32,9 @@ namespace PlaniranjePutovanja.AuthService.Services
         IPasswordHasher passwordHasher,
         IJwtTokenService jwtTokenService,
         IValidator<RegisterRequestDto> registerValidator,
-        IValidator<LoginRequestDto> loginValidator)
+        IValidator<LoginRequestDto> loginValidator,
+        ITravelServiceClient travelServiceClient,
+        IExpenseServiceClient expenseServiceClient)
         {
             _userRepository = userRepository;
             _authMapper = authMapper;
@@ -37,6 +42,8 @@ namespace PlaniranjePutovanja.AuthService.Services
             _jwtTokenService = jwtTokenService;
             _registerValidator = registerValidator;
             _loginValidator = loginValidator;
+            _travelServiceClient = travelServiceClient;
+            _expenseServiceClient = expenseServiceClient;
         }
 
         //public async Task<bool> CanRegisterAsync(string email, CancellationToken cancellationToken = default)
@@ -118,5 +125,32 @@ namespace PlaniranjePutovanja.AuthService.Services
         //    var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
         //    return user == null ? null : _authMapper.MapToUserDto(user);
         //}
+
+        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
+        {
+            var users = await _userRepository.GetAllAsync();
+            return users.Select(u => _authMapper.MapToUserDto(u)).ToList();
+        }
+
+        public async Task<bool> DeleteUserAsync(string userId)
+        {
+            // Dobavimo sva putovanja korisnika
+            var travels = await _travelServiceClient.GetTravelsByUserIdAsync(userId);
+
+            if (travels != null && travels.Any())
+            {
+                foreach (var travel in travels)
+                {
+                    // Obrisemo sve troskove vezane za konkretno putovanje
+                    await _expenseServiceClient.DeleteExpensesByTravelIdAsync(travel.Id);
+
+                    // Obrisemo samo putovanje (sto ce kaskadno obrisati destinacije, aktivnosti i checkliste u Travel bazi)
+                    await _travelServiceClient.DeleteTravelAsync(travel.Id);
+                }
+            }
+
+            // Na kraju obrisemo i korisnika iz baze
+            return await _userRepository.DeleteAsync(userId);
+        }
     }
 }

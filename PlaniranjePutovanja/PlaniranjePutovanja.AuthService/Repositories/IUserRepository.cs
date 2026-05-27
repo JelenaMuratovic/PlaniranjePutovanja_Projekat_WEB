@@ -18,5 +18,9 @@ namespace PlaniranjePutovanja.AuthService.Repositories
         Task AddAsync(User user, CancellationToken cancellationToken = default);
 
         Task UpdateAsync(User user, CancellationToken cancellationToken = default);
+
+        Task<IEnumerable<User>> GetAllAsync();
+
+        Task<bool> DeleteAsync(string id);
     }
 }
