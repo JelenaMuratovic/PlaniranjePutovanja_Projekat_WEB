@@ -3,7 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
+using PlaniranjePutovanja.AuthService.Helpers.Passwords;
 using PlaniranjePutovanja.AuthService.Persistence;
+using PlaniranjePutovanja.AuthService.Persistence.Seeding;
 using PlaniranjePutovanja.AuthService.Services;
 using PlaniranjePutovanja.Common.DTOs.Auth;
 using PlaniranjePutovanja.Common.Interfaces.Auth;
@@ -71,19 +73,23 @@ namespace PlaniranjePutovanja.AuthService
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service instance.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            // TODO: Replace the following sample code with your own logic 
-            //       or remove this RunAsync override if it's not needed in your service.
-
-            long iterations = 0;
-
-            while (true)
+            try
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                using var scope = _scopeFactory.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
 
-                ServiceEventSource.Current.ServiceMessage(this.Context, "Working-{0}", ++iterations);
+                // Seeding pocetnog admina
+                await DataSeeder.SeedAdminUserAsync(dbContext, passwordHasher);
 
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                ServiceEventSource.Current.ServiceMessage(this.Context, "Seeding base successful.");
             }
+            catch (Exception ex)
+            {
+                ServiceEventSource.Current.ServiceMessage(this.Context, $"Error during database seeding: {ex.Message}");
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);            
         }
     }
 }

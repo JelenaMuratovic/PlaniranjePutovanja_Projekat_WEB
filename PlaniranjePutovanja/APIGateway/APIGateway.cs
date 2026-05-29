@@ -134,6 +134,17 @@ namespace APIGateway
                                 }
                             });
                         });
+
+                        builder.Services.AddCors(options =>
+                        {
+                            options.AddPolicy("FrontendCorsPolicy", policy =>
+                            {
+                                policy
+                                    .WithOrigins("http://localhost:5173") 
+                                    .AllowAnyHeader()
+                                    .AllowAnyMethod();
+                            });
+                        });
                         var app = builder.Build();
                         //if (app.Environment.IsDevelopment())
                         //{
@@ -143,6 +154,7 @@ namespace APIGateway
                         app.UseSwagger();
                         app.UseSwaggerUI();
                         app.UseRouting();
+                        app.UseCors("FrontendCorsPolicy");
                         app.UseAuthentication();
                         app.UseAuthorization();
                         app.MapControllers();
