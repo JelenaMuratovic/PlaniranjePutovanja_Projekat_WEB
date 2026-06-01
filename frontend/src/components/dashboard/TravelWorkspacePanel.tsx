@@ -5,6 +5,7 @@ import AddDestinationModal from "../destination/AddDestinationModal";
 import DestinationCard from "../destination/DestinationCard";
 import AddActivityModal from "../activity/AddActivityModal";
 import ActivityCard from "../activity/ActivityCard";
+import TravelChecklistPanel from "../checklist/TravelChecklistPanel";
 import { Modal } from "../shared/Modal";
 import { destinationApi } from "../../api/travel/destinationApi";
 import { activityApi } from "../../api/travel/activityApi";
@@ -56,6 +57,9 @@ export const TravelWorkspacePanel = ({
   const [destinationPendingDelete, setDestinationPendingDelete] =
     useState<DestinationDto | null>(null);
   const [destinations, setDestinations] = useState<DestinationDto[]>([]);
+  const [destinationsTravelId, setDestinationsTravelId] = useState<string | null>(
+    null,
+  );
   const [isLoadingDestinations, setIsLoadingDestinations] = useState(false);
   const [destinationNotice, setDestinationNotice] = useState<string | null>(
     null,
@@ -188,6 +192,7 @@ export const TravelWorkspacePanel = ({
     try {
       const data = await destinationApi.getDestinationsByTravelId(travel.id);
       setDestinations(data);
+      setDestinationsTravelId(travel.id);
     } catch (error) {
       // Debugging
       console.error("Failed to load destinations", error);
@@ -199,6 +204,7 @@ export const TravelWorkspacePanel = ({
 
   useEffect(() => {
     setDestinations([]);
+    setDestinationsTravelId(null);
     setActivitiesByDestination({});
     setDestinationBeingEdited(null);
     setDestinationPendingDelete(null);
@@ -240,13 +246,18 @@ export const TravelWorkspacePanel = ({
   };
 
   useEffect(() => {
+    if (destinationsTravelId !== travel.id) {
+      setActivitiesByDestination({});
+      return;
+    }
+
     if (destinations.length === 0) {
       setActivitiesByDestination({});
       return;
     }
 
     void loadActivities();
-  }, [travel.id, destinations]);
+  }, [travel.id, destinations, destinationsTravelId]);
 
   const handleAddDestination = async (values: CreateDestinationDto) => {
     try {
@@ -696,12 +707,7 @@ export const TravelWorkspacePanel = ({
 
         {activeTab === "checklist" && (
           <section className="app-card travel-workspace__section">
-            <div className="travel-workspace__planner-frame">
-              <div className="empty-state">
-                <h5>No checklist items yet</h5>
-                <p>Add essentials, documents, and reminders when ready.</p>
-              </div>
-            </div>
+            <TravelChecklistPanel travelId={travel.id} onRefresh={onRefresh} />
           </section>
         )}
       </div>

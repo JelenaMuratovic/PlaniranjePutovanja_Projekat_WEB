@@ -705,6 +705,155 @@
   font-size: 1rem;
 }
 
+.checklist-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.checklist-panel__header p {
+  max-width: 62ch;
+}
+
+.checklist-panel__counter {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(15, 118, 110, 0.08);
+  border: 1px solid rgba(15, 118, 110, 0.12);
+}
+
+.checklist-panel__counter strong {
+  color: var(--heading);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.checklist-panel__counter span {
+  color: var(--text-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.checklist-panel__form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.checklist-panel__list {
+  display: grid;
+  gap: 12px;
+}
+
+.checklist-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.98),
+    rgba(247, 250, 252, 0.96)
+  );
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.05);
+}
+
+.checklist-item--completed {
+  opacity: 0.75;
+}
+
+.checklist-item__check {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.08);
+  color: var(--primary-strong);
+  font-size: 1rem;
+  font-weight: 800;
+  flex: 0 0 auto;
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
+}
+
+.checklist-item__check:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.06);
+}
+
+.checklist-item__check--active {
+  background: linear-gradient(135deg, #167c73, #0f5f63);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 12px 22px rgba(15, 95, 99, 0.22);
+}
+
+.checklist-item__content {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 0;
+}
+
+.checklist-item__content h5,
+.checklist-item__content p {
+  margin: 0;
+}
+
+.checklist-item__content h5 {
+  color: var(--heading);
+  font-size: 1rem;
+}
+
+.checklist-item__content p {
+  color: var(--text-soft);
+  font-size: 0.88rem;
+}
+
+.checklist-item__status {
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.05);
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.checklist-item--completed .checklist-item__status {
+  background: rgba(15, 118, 110, 0.12);
+  color: var(--primary-strong);
+}
+
+.checklist-item--completed .checklist-item__content h5 {
+  text-decoration: line-through;
+}
+
+.checklist-item__delete {
+  min-width: 92px;
+}
+
 .travel-day-strip__label {
   color: var(--text-soft);
   font-size: 0.78rem;
