@@ -88,6 +88,11 @@ namespace PlaniranjePutovanja.ExpenseService.Services
             {
                 throw new ValidationException(validationResult.Errors);
             }
+            var travelFounded = await _travelServiceClient.GetTravelByIdAsync(travelId);
+            if (travelFounded == null)
+            {
+                throw new KeyNotFoundException($"Travel with id '{travelId}' was not found.");
+            }
 
             // Trajni upis u SQL bazu
             var expense = _expenseMapper.ToExpense(dto);
@@ -151,7 +156,10 @@ namespace PlaniranjePutovanja.ExpenseService.Services
             if (!budgetResult.HasValue)
             {
                 var travel = await _travelServiceClient.GetTravelByIdAsync(travelId);
-                if (travel == null) return null; // Putovanje stvarno ne postoji nigde
+                if (travel == null)
+                {
+                    throw new KeyNotFoundException($"Travel with id '{travelId}' was not found.");
+                }
                 decimal plannedBudget = (decimal)travel.Budget;
 
                 // Inicijalizujemo prazno stanje 
@@ -224,6 +232,11 @@ namespace PlaniranjePutovanja.ExpenseService.Services
 
         public async Task<bool> DeleteExpensesByTravelIdAsync(string travelId, CancellationToken cancellationToken = default)
         {
+            var travel = await _travelServiceClient.GetTravelByIdAsync(travelId);
+            if (travel == null)
+            {
+                throw new KeyNotFoundException($"Travel with id '{travelId}' was not found.");
+            }
             var expenses = await _expenseRepository.GetByTravelIdAsync(travelId, cancellationToken);
             foreach (var exp in expenses)
             {

@@ -21,7 +21,7 @@ namespace PlaniranjePutovanja.TravelService.Repositories
         public async Task<Travel?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Travels
-                .Include(t => t.Destinations)
+                .Include(t => t.Destinations).ThenInclude(d => d.Activities)
                 .Include(t => t.Checklists)
                 .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
         }
@@ -29,9 +29,17 @@ namespace PlaniranjePutovanja.TravelService.Repositories
         public async Task<IEnumerable<Travel>> GetByUserIdAsync(string userId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Travels
-                .Where(t => t.UserId == userId && t.IsActive)
-                .OrderByDescending(t => t.CreatedAt)
-                .ToListAsync(cancellationToken);
+            // Ukljucujemo destinacije i za svaku destinaciju njene aktivnosti
+            .Include(t => t.Destinations)
+            .ThenInclude(d => d.Activities)
+            // Ukljucujemo checkliste koje pripadaju tom putovanju
+            .Include(t => t.Checklists)
+            // Filtriramo samo aktivna putovanja za tog konkretnog korisnika
+            .Where(t => t.UserId == userId && t.IsActive)
+            // Sortiramo da najnovija kreirana putovanja budu prva
+            .OrderByDescending(t => t.CreatedAt)
+            // Izvrsavamo upit i pretvaramo u listu
+           .ToListAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<Travel>> GetAllAsync(CancellationToken cancellationToken = default)

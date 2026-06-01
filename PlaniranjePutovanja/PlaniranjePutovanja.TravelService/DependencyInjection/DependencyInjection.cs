@@ -55,6 +55,9 @@ namespace PlaniranjePutovanja.TravelService.DependencyInjection
             services.AddSingleton<IValidator<CreateDestinationDto>, CreateDestinationDtoValidator>();
             services.AddSingleton<IValidator<CreateActivityDto>, CreateActivityDtoValidator>();
             services.AddSingleton<IValidator<CreateChecklistDto>, CreateChecklistDtoValidator>();
+            services.AddSingleton<IValidator<UpdateTravelDto>, UpdateTravelDtoValidator>();
+            services.AddSingleton<IValidator<UpdateDestinationDto>, UpdateDestinationDtoValidator>();
+            services.AddSingleton<IValidator<UpdateActivityDto>, UpdateActivityDtoValidator>();
             return services;
         }
     }

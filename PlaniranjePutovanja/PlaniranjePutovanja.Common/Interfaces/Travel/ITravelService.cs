@@ -21,6 +21,8 @@ namespace PlaniranjePutovanja.Common.Interfaces.Travel
 
         Task<bool> DeleteTravelAsync(string id);
 
+        Task<TravelDto?> UpdateTravelAsync(string id, UpdateTravelDto request);
+
         // Operacije vezane za destinacije
         Task<DestinationDto> AddDestinationAsync(string travelId, CreateDestinationDto request);
 
@@ -30,6 +32,8 @@ namespace PlaniranjePutovanja.Common.Interfaces.Travel
 
         Task<bool> DeleteDestinationAsync(string travelId, string id);
 
+        Task<DestinationDto?> UpdateDestinationAsync(string travelId, string id, UpdateDestinationDto request);
+
         // Operacije vezane za aktivnosti
         Task<ActivityDto> AddActivityAsync(string travelId, string destinationId, CreateActivityDto request);
 
@@ -38,6 +42,8 @@ namespace PlaniranjePutovanja.Common.Interfaces.Travel
         Task<IEnumerable<ActivityDto>> GetActivitiesByDestinationIdAsync(string travelId, string destinationId);
 
         Task<bool> DeleteActivityAsync(string travelId, string destinationId, string id);
+
+        Task<ActivityDto?> UpdateActivityAsync(string travelId, string destinationId, string id, UpdateActivityDto request);
 
         // Operacije vezane za checkliste
         Task<ChecklistDto> AddChecklistAsync(string travelId, CreateChecklistDto request);

@@ -18,5 +18,7 @@ namespace PlaniranjePutovanja.TravelService.Services
         Task<IEnumerable<TravelDto>> GetAllTravelsAsync(CancellationToken cancellationToken = default);
 
         Task<bool> DeleteTravelAsync(string id, CancellationToken cancellationToken = default);
+
+        Task<TravelDto?> UpdateTravelAsync(string id, UpdateTravelDto dto, CancellationToken cancellationToken = default);
     }
 }

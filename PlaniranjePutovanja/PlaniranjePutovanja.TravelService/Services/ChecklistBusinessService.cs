@@ -40,7 +40,7 @@ namespace PlaniranjePutovanja.TravelService.Services
             var travel = await _travelRepository.GetByIdAsync(travelId, cancellationToken);
             if (travel == null)
             {
-                throw new InvalidOperationException($"Travel with id '{travelId}' was not found.");
+                throw new KeyNotFoundException($"Travel with id '{travelId}' was not found.");
             }
 
             var checklist = _travelMapper.ToChecklist(dto);

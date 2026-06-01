@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.ServiceFabric.Services.Remoting.Client;
+using PlaniranjePutovanja.APIGateway.Helpers;
 using PlaniranjePutovanja.Common.DTOs.Travel;
 using PlaniranjePutovanja.Common.Interfaces.Travel;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace PlaniranjePutovanja.APIGateway.Controllers
@@ -38,8 +40,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Create travel failed.");
-                //return StatusCode(500, new { error = ex.Message });
-                return StatusCode(500, $"Error: {ex.Message}, {ex.ToString()}");
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -60,7 +61,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Get travel by id failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -76,7 +77,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Get travels by user id failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -91,7 +92,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Get all travels failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -112,7 +113,28 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Delete travel failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
+            }
+        }
+
+        [HttpPut("travels/{id}")]
+        [Authorize(Policy = "CanEditTravel")] 
+        public async Task<IActionResult> UpdateTravel(string id, [FromBody] UpdateTravelDto request)
+        {
+            try
+            {
+                var result = await _travelService.UpdateTravelAsync(id, request);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Update travel failed.");
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -129,7 +151,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Add destination failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -150,7 +172,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Get destination by id failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -166,7 +188,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Get destinations by travel id failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -187,11 +209,32 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Delete destination failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
-        // Endpoints activity
+        [HttpPut("travels/{travelId}/destinations/{id}")]
+        [Authorize(Policy = "CanEditTravel")]
+        public async Task<IActionResult> UpdateDestination(string travelId, string id, [FromBody] UpdateDestinationDto request)
+        {
+            try
+            {
+                var result = await _travelService.UpdateDestinationAsync(travelId, id, request);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Update destination failed.");
+                return ApiExceptionMapper.MapException(this, ex);
+            }
+        }
+
+        // Endpoints aktivnosti
         [HttpPost("travels/{travelId}/destinations/{destinationId}/activities")]
         [Authorize(Policy = "CanEditTravel")]
         public async Task<IActionResult> AddActivity(string travelId, string destinationId, [FromBody] CreateActivityDto request)
@@ -204,7 +247,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Add activity failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -225,7 +268,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Get activity by id failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -241,7 +284,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Get activities by destination id failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -262,11 +305,31 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Delete activity failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
-        // Endpoints checklist
+        [HttpPut("travels/{travelId}/destinations/{destinationId}/activities/{id}")]
+        [Authorize(Policy = "CanEditTravel")]
+        public async Task<IActionResult> UpdateActivity(string travelId, string destinationId, string id, [FromBody] UpdateActivityDto request)
+        {
+            try
+            {
+                var result = await _travelService.UpdateActivityAsync(travelId, destinationId, id, request);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Update activity failed.");
+                return ApiExceptionMapper.MapException(this, ex);
+            }
+        }
+
+        // Endpoints checklists
         [HttpPost("travels/{travelId}/checklists")]
         [Authorize(Policy = "CanEditTravel")]
         public async Task<IActionResult> AddChecklist(string travelId, [FromBody] CreateChecklistDto request)
@@ -279,7 +342,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Add checklist failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -300,7 +363,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Get checklist by id failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -316,7 +379,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Get checklists by travel id failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -337,7 +400,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Toggle checklist failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -358,7 +421,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Delete checklist failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
     }

@@ -71,6 +71,12 @@ namespace PlaniranjePutovanja.TravelService
             return await travelService.DeleteTravelAsync(id, CancellationToken.None);
         }
 
+        public async Task<TravelDto?> UpdateTravelAsync(string id, UpdateTravelDto request)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var travelService = scope.ServiceProvider.GetRequiredService<ITravelBusinessService>();
+            return await travelService.UpdateTravelAsync(id, request, CancellationToken.None);
+        }
 
         // Operacije vezane za destinacije
         public async Task<DestinationDto> AddDestinationAsync(string travelId, CreateDestinationDto request)
@@ -101,6 +107,13 @@ namespace PlaniranjePutovanja.TravelService
             return await destinationService.DeleteDestinationAsync(travelId, id, CancellationToken.None);
         }
 
+        public async Task<DestinationDto?> UpdateDestinationAsync(string travelId, string id, UpdateDestinationDto request)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var destinationService = scope.ServiceProvider.GetRequiredService<IDestinationBusinessService>();
+            return await destinationService.UpdateDestinationAsync(travelId, id, request, CancellationToken.None);
+        }
+
         // Operacije vezane za aktivnosti
         public async Task<ActivityDto> AddActivityAsync(string travelId, string destinationId, CreateActivityDto request)
         {
@@ -128,6 +141,13 @@ namespace PlaniranjePutovanja.TravelService
             using var scope = _scopeFactory.CreateScope();
             var activityService = scope.ServiceProvider.GetRequiredService<IActivityBusinessService>();
             return await activityService.DeleteActivityAsync(travelId, destinationId, id, CancellationToken.None);
+        }
+
+        public async Task<ActivityDto?> UpdateActivityAsync(string travelId, string destinationId, string id, UpdateActivityDto request)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var activityService = scope.ServiceProvider.GetRequiredService<IActivityBusinessService>();
+            return await activityService.UpdateActivityAsync(travelId, destinationId, id, request, CancellationToken.None);
         }
 
         // Operacije vezane za checkliste

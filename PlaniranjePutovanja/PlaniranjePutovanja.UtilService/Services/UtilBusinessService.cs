@@ -35,7 +35,9 @@ namespace PlaniranjePutovanja.UtilService.Services
             // Povucemo sve potrebne podatke iz ostalih servisa
             var travel = await _travelServiceClient.GetTravelByIdAsync(travelId);
             if (travel == null)
-                throw new InvalidOperationException($"Travel with id '{travelId}' not found.");
+            {
+                throw new KeyNotFoundException($"Travel with id '{travelId}' was not found.");
+            }
 
             var destinations = await _travelServiceClient.GetDestinationsByTravelIdAsync(travelId);
             var activities = await _travelServiceClient.GetActivitiesByTravelIdAsync(travelId);
@@ -61,7 +63,9 @@ namespace PlaniranjePutovanja.UtilService.Services
             // Validiraj da putovanje postoji
             var travel = await _travelServiceClient.GetTravelByIdAsync(travelId);
             if (travel == null)
-                throw new InvalidOperationException($"Travel with id '{travelId}' not found.");
+            {
+                throw new KeyNotFoundException($"Travel with id '{travelId}' was not found.");
+            }
 
             // Generise JWT za deljenje
             var shareToken = await _shareTokenService.GenerateShareTokenAsync(

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.ServiceFabric.Services.Remoting.Client;
+using PlaniranjePutovanja.APIGateway.Helpers;
 using PlaniranjePutovanja.Common.DTOs.Expense;
 using PlaniranjePutovanja.Common.Interfaces.Expense;
 
@@ -34,7 +35,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Add expense failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -50,7 +51,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Get expenses by travel id failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -72,7 +73,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Get budget summary failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -94,7 +95,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Delete expense failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 

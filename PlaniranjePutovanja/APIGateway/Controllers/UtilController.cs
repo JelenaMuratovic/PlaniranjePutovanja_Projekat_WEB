@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PlaniranjePutovanja.APIGateway.Helpers;
 using PlaniranjePutovanja.Common.DTOs.Util;
 using PlaniranjePutovanja.Common.Interfaces.Util;
 
@@ -32,7 +33,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Generate share failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
 
@@ -53,7 +54,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Generate PDF failed.");
-                return StatusCode(500, new { error = ex.Message });
+                return ApiExceptionMapper.MapException(this, ex);
             }
         }
     }

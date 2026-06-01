@@ -28,9 +28,13 @@ namespace PlaniranjePutovanja.TravelService.Repositories
         public async Task<IEnumerable<Destination>> GetByTravelIdAsync(string travelId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Destinations
-                .Where(d => d.TravelId == travelId)
-                .OrderBy(d => d.CreatedAt)
-                .ToListAsync(cancellationToken);
+            // Ukljucujemo aktivnosti za svaku destinaciju u listi
+            .Include(d => d.Activities)
+            // Filtriramo destinacije koje pripadaju iskljucivo ovom putovanju
+            .Where(d => d.TravelId == travelId)
+            // Sortiramo ih po vremenu kreiranja
+            .OrderBy(d => d.CreatedAt)
+            .ToListAsync(cancellationToken);
         }
 
         public async Task AddAsync(Destination destination, CancellationToken cancellationToken = default)

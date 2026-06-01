@@ -6,6 +6,16 @@ type ApiErrorPayload = {
   errors?: Record<string, string[] | string>;
 };
 
+const unwrapAggregateMessage = (message: string): string => {
+  const prefix = "One or more errors occurred. (";
+
+  if (message.startsWith(prefix) && message.endsWith(")")) {
+    return message.slice(prefix.length, -1);
+  }
+
+  return message;
+};
+
 export const getApiErrorMessage = (error: unknown): string => {
   if (axios.isAxiosError<ApiErrorPayload>(error)) {
     const payload = error.response?.data;
@@ -15,11 +25,11 @@ export const getApiErrorMessage = (error: unknown): string => {
     }
 
     if (payload?.message) {
-      return payload.message;
+      return unwrapAggregateMessage(payload.message);
     }
 
     if (payload?.error) {
-      return payload.error;
+      return unwrapAggregateMessage(payload.error);
     }
 
     if (payload?.errors) {
@@ -34,11 +44,11 @@ export const getApiErrorMessage = (error: unknown): string => {
       }
     }
 
-    return error.message || "An error occurred.";
+    return unwrapAggregateMessage(error.message || "An error occurred.");
   }
 
   if (error instanceof Error) {
-    return error.message;
+    return unwrapAggregateMessage(error.message);
   }
 
   return "An unexpected error occurred.";
