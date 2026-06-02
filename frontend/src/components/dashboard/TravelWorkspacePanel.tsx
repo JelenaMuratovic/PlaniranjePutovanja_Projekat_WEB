@@ -6,7 +6,9 @@ import DestinationCard from "../destination/DestinationCard";
 import AddActivityModal from "../activity/AddActivityModal";
 import ActivityCard from "../activity/ActivityCard";
 import TravelChecklistPanel from "../checklist/TravelChecklistPanel";
+import TravelExpensePanel from "../expense/TravelExpensePanel";
 import { Modal } from "../shared/Modal";
+import { expenseApi } from "../../api/expense";
 import { destinationApi } from "../../api/travel/destinationApi";
 import { activityApi } from "../../api/travel/activityApi";
 import { getApiErrorMessage } from "../../helpers/apiError";
@@ -24,6 +26,7 @@ import type {
   ActivityDto,
   CreateActivityDto,
 } from "../../models/travel/activity/dtos";
+import type { TravelBudgetSummaryDto } from "../../models/expense";
 
 type TravelWorkspacePanelProps = {
   travel: TravelDto;
@@ -49,7 +52,7 @@ export const TravelWorkspacePanel = ({
   onRefresh,
 }: TravelWorkspacePanelProps) => {
   const [activeTab, setActiveTab] = useState<
-    "details" | "destinations" | "activities" | "map" | "checklist"
+    "details" | "destinations" | "activities" | "expenses" | "map" | "checklist"
   >("details");
   const [showAddDestination, setShowAddDestination] = useState(false);
   const [destinationBeingEdited, setDestinationBeingEdited] =
@@ -57,9 +60,9 @@ export const TravelWorkspacePanel = ({
   const [destinationPendingDelete, setDestinationPendingDelete] =
     useState<DestinationDto | null>(null);
   const [destinations, setDestinations] = useState<DestinationDto[]>([]);
-  const [destinationsTravelId, setDestinationsTravelId] = useState<string | null>(
-    null,
-  );
+  const [destinationsTravelId, setDestinationsTravelId] = useState<
+    string | null
+  >(null);
   const [isLoadingDestinations, setIsLoadingDestinations] = useState(false);
   const [destinationNotice, setDestinationNotice] = useState<string | null>(
     null,
@@ -75,6 +78,13 @@ export const TravelWorkspacePanel = ({
     destination: DestinationSchedule;
     activity: ActivityDto;
   } | null>(null);
+  const [budgetRefreshKey, setBudgetRefreshKey] = useState(0);
+  const [budgetSummary, setBudgetSummary] =
+    useState<TravelBudgetSummaryDto | null>(null);
+  const [isLoadingBudgetSummary, setIsLoadingBudgetSummary] = useState(false);
+  const [budgetSummaryError, setBudgetSummaryError] = useState<string | null>(
+    null,
+  );
   const [activitiesByDestination, setActivitiesByDestination] = useState<
     Record<string, ActivityDto[]>
   >({});
@@ -129,6 +139,10 @@ export const TravelWorkspacePanel = ({
     }, 3200);
   };
 
+  const clearBudgetSummaryError = () => {
+    setBudgetSummaryError(null);
+  };
+
   useEffect(
     () => () => {
       if (destinationNoticeTimer.current) {
@@ -143,6 +157,26 @@ export const TravelWorkspacePanel = ({
     },
     [],
   );
+
+  const loadBudgetSummary = async () => {
+    setIsLoadingBudgetSummary(true);
+    clearBudgetSummaryError();
+
+    try {
+      const data = await expenseApi.getBudgetSummary(travel.id);
+      setBudgetSummary(data);
+    } catch (error) {
+      console.error("Failed to load budget summary", error);
+      setBudgetSummaryError("Budget summary could not be loaded right now.");
+      setBudgetSummary(null);
+    } finally {
+      setIsLoadingBudgetSummary(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadBudgetSummary();
+  }, [travel.id, budgetRefreshKey]);
 
   const destinationSchedules = useMemo<DestinationSchedule[]>(() => {
     const schedules: DestinationSchedule[] = [];
@@ -324,6 +358,7 @@ export const TravelWorkspacePanel = ({
           ? "Activity updated successfully."
           : "Activity added successfully.",
       );
+      setBudgetRefreshKey((current) => current + 1);
       await loadDestinations();
       await loadActivities();
       if (onRefresh) {
@@ -404,6 +439,7 @@ export const TravelWorkspacePanel = ({
         setActivityDestination(null);
       }
       showDestinationNotice("Destination deleted successfully.");
+      setBudgetRefreshKey((current) => current + 1);
       await loadDestinations();
       if (onRefresh) {
         void onRefresh();
@@ -451,6 +487,7 @@ export const TravelWorkspacePanel = ({
       );
       setActivityPendingDelete(null);
       showDestinationNotice("Activity deleted successfully.");
+      setBudgetRefreshKey((current) => current + 1);
       await loadDestinations();
       await loadActivities();
       if (onRefresh) {
@@ -469,6 +506,15 @@ export const TravelWorkspacePanel = ({
   const selectedActivity = activityBeingEdited?.activity ?? null;
   const selectedActivityDestination =
     activityBeingEdited?.destination ?? activityDestination;
+
+  const effectiveBudgetSummary = budgetSummary ?? {
+    travelId: travel.id,
+    plannedBudget: travel.budget,
+    totalExpenses: 0,
+    remainingBudget: travel.budget,
+    spentPercentage: 0,
+    expenseCount: 0,
+  };
 
   return (
     <div className="travel-workspace">
@@ -497,6 +543,12 @@ export const TravelWorkspacePanel = ({
             onClick={() => setActiveTab("activities")}
           >
             Activities
+          </button>
+          <button
+            className={`workspace-tabs__item ${activeTab === "expenses" ? "workspace-tabs__item--active" : ""}`}
+            onClick={() => setActiveTab("expenses")}
+          >
+            Expenses
           </button>
           <button
             className={`workspace-tabs__item ${activeTab === "map" ? "workspace-tabs__item--active" : ""}`}
@@ -530,16 +582,72 @@ export const TravelWorkspacePanel = ({
               <article className="travel-workspace__meta-card">
                 <span>Planned budget</span>
                 <strong>
-                  {travel.budget.toLocaleString("en-GB", {
-                    style: "currency",
-                    currency: "EUR",
-                  })}
+                  {effectiveBudgetSummary.plannedBudget.toLocaleString(
+                    "en-GB",
+                    {
+                      style: "currency",
+                      currency: "EUR",
+                    },
+                  )}
+                </strong>
+              </article>
+              <article className="travel-workspace__meta-card">
+                <span>Total spent</span>
+                <strong>
+                  {effectiveBudgetSummary.totalExpenses.toLocaleString(
+                    "en-GB",
+                    {
+                      style: "currency",
+                      currency: "EUR",
+                    },
+                  )}
+                </strong>
+              </article>
+              <article className="travel-workspace__meta-card">
+                <span>Remaining budget</span>
+                <strong
+                  className={
+                    effectiveBudgetSummary.remainingBudget < 0
+                      ? "expense-panel__negative"
+                      : ""
+                  }
+                >
+                  {effectiveBudgetSummary.remainingBudget.toLocaleString(
+                    "en-GB",
+                    {
+                      style: "currency",
+                      currency: "EUR",
+                    },
+                  )}
+                </strong>
+              </article>
+              <article className="travel-workspace__meta-card">
+                <span>Spent percentage</span>
+                <strong>
+                  {effectiveBudgetSummary.spentPercentage.toFixed(0)}%
                 </strong>
               </article>
               <article className="travel-workspace__meta-card">
                 <span>Destinations</span>
                 <strong>{travel.destinationCount}</strong>
               </article>
+            </div>
+
+            <div className="expense-panel__progress" style={{ marginTop: 16 }}>
+              <div className="expense-panel__progress-track" aria-hidden="true">
+                <div
+                  className={`expense-panel__progress-fill ${effectiveBudgetSummary.remainingBudget < 0 ? "expense-panel__progress-fill--warning" : ""}`}
+                  style={{
+                    width: `${Math.min(100, Math.max(0, effectiveBudgetSummary.spentPercentage))}%`,
+                  }}
+                />
+              </div>
+              <span>
+                {isLoadingBudgetSummary
+                  ? "Loading budget summary..."
+                  : (budgetSummaryError ??
+                    `${effectiveBudgetSummary.totalExpenses.toLocaleString("en-GB", { style: "currency", currency: "EUR" })} spent from ${effectiveBudgetSummary.plannedBudget.toLocaleString("en-GB", { style: "currency", currency: "EUR" })}`)}
+              </span>
             </div>
 
             {travel.notes ? (
@@ -568,7 +676,10 @@ export const TravelWorkspacePanel = ({
               >
                 {Array.from({ length: totalDays }, (_, i) => i + 1).map(
                   (dayNumber) => {
-                    const d = addDaysToDateOnly(travel.startDate, dayNumber - 1);
+                    const d = addDaysToDateOnly(
+                      travel.startDate,
+                      dayNumber - 1,
+                    );
                     const dateLabel = formatDateOnly(d);
                     const destinationOnDay = destinationDayMap.get(dayNumber);
                     const tooltip = destinationOnDay
@@ -695,6 +806,17 @@ export const TravelWorkspacePanel = ({
                 </div>
               )}
             </div>
+          </section>
+        )}
+
+        {activeTab === "expenses" && (
+          <section className="app-card travel-workspace__section">
+            <TravelExpensePanel
+              travelId={travel.id}
+              plannedBudget={travel.budget}
+              refreshKey={budgetRefreshKey}
+              onRefresh={onRefresh}
+            />
           </section>
         )}
 
