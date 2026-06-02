@@ -41,6 +41,7 @@ namespace PlaniranjePutovanja.ExpenseService.DependencyInjection
         public static IServiceCollection AddExpenseServices(this IServiceCollection services)
         {
             services.AddScoped<IBudgetBusinessService, BudgetBusinessService>();
+            services.AddScoped<IActivityExpenseService, ActivityExpenseService>();
             return services;
         }
 

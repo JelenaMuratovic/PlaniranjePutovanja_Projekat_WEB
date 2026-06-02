@@ -13,6 +13,11 @@ namespace PlaniranjePutovanja.ExpenseService.Repositories
 
         Task<IEnumerable<Expense>> GetByTravelIdAsync(string travelId, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// Pronadje sistemske troskove vezane za aktivnost
+        /// </summary>
+        Task<IEnumerable<Expense>> GetByActivityIdAsync(string activityId, CancellationToken cancellationToken = default);
+
         Task AddAsync(Expense expense, CancellationToken cancellationToken = default);
 
         Task AddOrUpdateAsync(Expense expense, CancellationToken cancellationToken = default);

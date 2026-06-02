@@ -88,11 +88,11 @@ namespace PlaniranjePutovanja.ExpenseService.Services
             {
                 throw new ValidationException(validationResult.Errors);
             }
-            var travelFounded = await _travelServiceClient.GetTravelByIdAsync(travelId);
-            if (travelFounded == null)
-            {
-                throw new KeyNotFoundException($"Travel with id '{travelId}' was not found.");
-            }
+            //var travelFounded = await _travelServiceClient.GetTravelByIdAsync(travelId);
+            //if (travelFounded == null)
+            //{
+            //    throw new KeyNotFoundException($"Travel with id '{travelId}' was not found.");
+            //}
 
             // Trajni upis u SQL bazu
             var expense = _expenseMapper.ToExpense(dto);
@@ -250,6 +250,123 @@ namespace PlaniranjePutovanja.ExpenseService.Services
             await tx.CommitAsync();
 
             return true;
+        }
+
+        public async Task AddSystemGeneratedExpenseAsync(Expense expense, decimal plannedBudget, CancellationToken cancellationToken = default)
+        {
+            var budgetCollection = await GetCollectionAsync();
+            using var tx = _stateManager.CreateTransaction();
+
+            var budgetResult = await budgetCollection.TryGetValueAsync(tx, expense.TravelId, LockMode.Update);
+
+            //if (budgetResult.HasValue)
+            //{
+            //    var oldState = budgetResult.Value;
+            //    var updatedState = new BudgetState
+            //    {
+            //        TravelId = oldState.TravelId,
+            //        PlannedBudget = oldState.PlannedBudget,
+            //        LastUpdated = DateTime.UtcNow,
+            //        Expenses = new List<Expense>(oldState.Expenses) { expense }
+            //    };
+
+            //    await budgetCollection.SetAsync(tx, expense.TravelId, updatedState);
+            //}
+            BudgetState updatedState;
+            bool isNewEntry = false;
+
+            if (budgetResult.HasValue)
+            {
+                var oldState = budgetResult.Value;
+                updatedState = new BudgetState
+                {
+                    TravelId = oldState.TravelId,
+                    PlannedBudget = oldState.PlannedBudget,
+                    LastUpdated = DateTime.UtcNow,
+                    Expenses = new List<Expense>(oldState.Expenses) { expense }
+                };
+            }
+            else
+            {
+                //var travel = await _travelServiceClient.GetTravelByIdAsync(expense.TravelId);
+                //if (travel == null)
+                //{
+                //    throw new KeyNotFoundException($"Travel with id '{expense.TravelId}' was not found.");
+                //}
+
+                updatedState = new BudgetState
+                {
+                    TravelId = expense.TravelId,
+                    PlannedBudget = plannedBudget, // kao deafult, pa ce se popuniti kasnije kada korisnik otvori Budget dashboard
+                    LastUpdated = DateTime.UtcNow,
+                    Expenses = new List<Expense> { expense }
+                };
+
+                isNewEntry = true;
+            }
+            // Upisemo — Add za nove, Set za postojece
+            if (isNewEntry)
+            {
+                await budgetCollection.AddAsync(tx, expense.TravelId, updatedState);
+            }
+            else
+            {
+                await budgetCollection.SetAsync(tx, expense.TravelId, updatedState);
+            }
+
+            await tx.CommitAsync();
+        }
+
+        public async Task UpdateSystemGeneratedExpenseAsync(Expense expense, decimal oldAmount, CancellationToken cancellationToken = default)
+        {
+            var budgetCollection = await GetCollectionAsync();
+            using var tx = _stateManager.CreateTransaction();
+
+            var budgetResult = await budgetCollection.TryGetValueAsync(tx, expense.TravelId, LockMode.Update);
+
+            if (budgetResult.HasValue)
+            {
+                var oldState = budgetResult.Value;
+                var updatedExpenses = oldState.Expenses.Select(e =>
+                    e.Id == expense.Id ? expense : e
+                ).ToList();
+
+                var updatedState = new BudgetState
+                {
+                    TravelId = oldState.TravelId,
+                    PlannedBudget = oldState.PlannedBudget,
+                    LastUpdated = DateTime.UtcNow,
+                    Expenses = updatedExpenses
+                };
+
+                await budgetCollection.SetAsync(tx, expense.TravelId, updatedState);
+            }
+
+            await tx.CommitAsync();
+        }
+
+        public async Task RemoveSystemGeneratedExpenseAsync(string travelId, string expenseId, CancellationToken cancellationToken = default)
+        {
+            var budgetCollection = await GetCollectionAsync();
+            using var tx = _stateManager.CreateTransaction();
+
+            var budgetResult = await budgetCollection.TryGetValueAsync(tx, travelId, LockMode.Update);
+
+            if (budgetResult.HasValue)
+            {
+                var oldState = budgetResult.Value;
+                var updatedState = new BudgetState
+                {
+                    TravelId = oldState.TravelId,
+                    PlannedBudget = oldState.PlannedBudget,
+                    LastUpdated = DateTime.UtcNow,
+                    Expenses = oldState.Expenses.Where(e => e.Id != expenseId).ToList()
+                };
+
+                await budgetCollection.SetAsync(tx, travelId, updatedState);
+            }
+
+            await tx.CommitAsync();
         }
 
         //public async Task PersistBudgetsAsync(CancellationToken cancellationToken = default)

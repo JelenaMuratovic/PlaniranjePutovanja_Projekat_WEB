@@ -34,5 +34,17 @@ namespace PlaniranjePutovanja.ExpenseService.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         [DataMember]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
+        /// Ako je null, ovo je rucni trosak. Ako ima vrednost, trosak je automatski kreiran iz aktivnosti, kao cena aktivnosti
+        /// Koristi se kao referenca na aktivnost iz koje je trosak kreiran, kako bi se mogao povezati sa aktivnoscu i automatski azurirati ako se aktivnost azurira
+        /// </summary>
+        public string? ActivityId { get; set; }
+
+        /// <summary>
+        /// true → sistemski trosak iz aktivnosti
+        /// false → rucni trosak
+        /// </summary>
+        public bool IsSystemGenerated { get; set; }
     }
 }

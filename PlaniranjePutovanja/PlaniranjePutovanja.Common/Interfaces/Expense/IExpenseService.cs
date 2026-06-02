@@ -34,5 +34,30 @@ namespace PlaniranjePutovanja.Common.Interfaces.Expense
         /// Brise sve troskove povezane s odredjenim putovanjem
         /// </summary>
         Task<bool> DeleteExpensesByTravelIdAsync(string travelId);
+
+        /// <summary>
+        /// Kreira novi trosak aktivnosti povezan s odredjenim putovanjem i aktivnoscu
+        /// </summary>
+        Task<string> CreateActivityExpenseAsync(
+        string travelId,
+        string activityId,
+        string activityName,
+        decimal price,
+        decimal plannedBudget);
+
+        /// <summary>
+        /// Azurira cenu troska aktivnosti povezanog s odredjenim putovanjem i aktivnoscu
+        /// </summary>
+        Task<bool> UpdateActivityExpenseAsync(
+            string travelId,
+            string activityId,
+            decimal newPrice);
+
+        /// <summary>
+        /// Brise trosak aktivnosti povezanog s odredjenim putovanjem i aktivnoscu
+        /// </summary>
+        Task<bool> DeleteActivityExpenseAsync(
+            string travelId,
+            string activityId);
     }
 }

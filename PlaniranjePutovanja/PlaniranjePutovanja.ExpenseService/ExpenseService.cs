@@ -96,6 +96,37 @@ namespace PlaniranjePutovanja.ExpenseService
             return await budgetService.DeleteExpensesByTravelIdAsync(travelId, CancellationToken.None);
         }
 
+        public async Task<string> CreateActivityExpenseAsync(
+        string travelId,
+        string activityId,
+        string activityName,
+        decimal price,
+        decimal plannedBudget)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var activityExpenseService = scope.ServiceProvider.GetRequiredService<IActivityExpenseService>();
+            return await activityExpenseService.CreateActivityExpenseAsync(travelId, activityId, activityName, price, plannedBudget, CancellationToken.None);
+        }
+
+        public async Task<bool> UpdateActivityExpenseAsync(
+            string travelId,
+            string activityId,
+            decimal newPrice)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var activityExpenseService = scope.ServiceProvider.GetRequiredService<IActivityExpenseService>();
+            return await activityExpenseService.UpdateActivityExpenseAsync(travelId, activityId, newPrice, CancellationToken.None);
+        }
+
+        public async Task<bool> DeleteActivityExpenseAsync(
+            string travelId,
+            string activityId)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var activityExpenseService = scope.ServiceProvider.GetRequiredService<IActivityExpenseService>();
+            return await activityExpenseService.DeleteActivityExpenseAsync(travelId, activityId, CancellationToken.None);
+        }
+
         /// <summary>
         /// This is the main entry point for your service replica.
         /// This method executes when this replica of your service becomes primary and has write status.

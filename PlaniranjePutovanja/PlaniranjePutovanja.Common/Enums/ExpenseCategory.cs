@@ -13,6 +13,7 @@ namespace PlaniranjePutovanja.Common.Enums
         Food = 2,          // Hrana
         Tickets = 3,       // Ulaznice
         Shopping = 4,      // Kupovina
-        Other = 5          // Ostalo
+        Activities = 5,    // Aktivnosti
+        Other = 6          // Ostalo
     }
 }

@@ -32,6 +32,13 @@ namespace PlaniranjePutovanja.ExpenseService.Repositories
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<IEnumerable<Expense>> GetByActivityIdAsync(string activityId, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Expenses
+                .Where(e => e.ActivityId == activityId && e.IsSystemGenerated)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task AddAsync(Expense expense, CancellationToken cancellationToken = default)
         {
             await _dbContext.Expenses.AddAsync(expense, cancellationToken);

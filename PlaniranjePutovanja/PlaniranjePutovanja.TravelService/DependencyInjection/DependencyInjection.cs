@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PlaniranjePutovanja.Common.DTOs.Travel;
+using PlaniranjePutovanja.TravelService.Clients;
 using PlaniranjePutovanja.TravelService.Mappers;
 using PlaniranjePutovanja.TravelService.Persistence;
 using PlaniranjePutovanja.TravelService.Repositories;
@@ -46,6 +47,7 @@ namespace PlaniranjePutovanja.TravelService.DependencyInjection
             services.AddScoped<IDestinationBusinessService, DestinationBusinessService>();
             services.AddScoped<IActivityBusinessService, ActivityBusinessService>();
             services.AddScoped<IChecklistBusinessService, ChecklistBusinessService>();
+            services.AddScoped<IActivityExpenseClient, ActivityExpenseClient>();
             return services;
         }
 
