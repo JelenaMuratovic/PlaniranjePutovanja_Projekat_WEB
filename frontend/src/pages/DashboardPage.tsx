@@ -90,15 +90,10 @@ export const DashboardPage = () => {
       return;
     }
     try {
-      // Debugging
-      console.log("loadTravels: user", user?.id, "role", user?.role);
-
       const data =
         user.role === "Admin"
           ? await travelApi.getAllTravels()
           : await travelApi.getTravelsByUserId(user.id);
-      // Debugging
-      console.log("loadTravels: response", data);
 
       setTravels(data ?? []);
       setSelectedTravel((currentTravel) => {
@@ -113,7 +108,6 @@ export const DashboardPage = () => {
         );
       });
     } catch (error) {
-      // Debugging
       console.error("Failed to load travels", error);
       setServerMessage(getApiErrorMessage(error));
     }

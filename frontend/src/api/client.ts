@@ -24,6 +24,11 @@ export const createApiClient = ({
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    const activeShareToken = sessionStorage.getItem("active_share_token");
+    if (activeShareToken) {
+      config.headers["X-Share-Token"] = activeShareToken;
+    }
+
     return config;
   });
 

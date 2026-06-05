@@ -8,6 +8,7 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { PublicOnlyRoute } from "./routes/PublicOnlyRoute";
 import "./App.css";
+import { SharedTravelPage } from "./pages/SharedTravelPage";
 
 function App() {
   const { isAuthenticated, loading } = useAuth();
@@ -35,6 +36,9 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
         </Route>
+      </Route>
+      <Route element={<AppLayout />}>
+        <Route path="/shared-travel" element={<SharedTravelPage />} />
       </Route>
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>

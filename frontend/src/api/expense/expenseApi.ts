@@ -41,8 +41,4 @@ export const expenseApi = {
 
     return response.data;
   },
-
-  deleteExpense: async (travelId: string, expenseId: string): Promise<void> => {
-    await expenseClient.delete(`/travels/${travelId}/expenses/${expenseId}`);
-  },
 };

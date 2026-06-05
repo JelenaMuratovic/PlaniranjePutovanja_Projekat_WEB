@@ -8,11 +8,13 @@ import type { ChecklistDto } from "../../models/travel/checklist/dtos";
 type TravelChecklistPanelProps = {
   travelId: string;
   onRefresh?: () => Promise<void> | void;
+  isReadOnly?: boolean;
 };
 
 export const TravelChecklistPanel = ({
   travelId,
   onRefresh,
+  isReadOnly = false,
 }: TravelChecklistPanelProps) => {
   const [items, setItems] = useState<ChecklistDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -188,24 +190,26 @@ export const TravelChecklistPanel = ({
         </div>
       </div>
 
-      <form className="checklist-panel__form" onSubmit={handleAddChecklist}>
-        <div className="field">
-          <input
-            id="checklist-item"
-            value={itemText}
-            onChange={(event) => setItemText(event.target.value)}
-            placeholder="Passport, charger, insurance, clothes..."
-          />
-        </div>
+      {!isReadOnly && (
+        <form className="checklist-panel__form" onSubmit={handleAddChecklist}>
+          <div className="field">
+            <input
+              id="checklist-item"
+              value={itemText}
+              onChange={(event) => setItemText(event.target.value)}
+              placeholder="Passport, charger, insurance, clothes..."
+            />
+          </div>
 
-        <button
-          type="submit"
-          className="button button--primary button--sm"
-          disabled={isSubmitting || itemText.trim().length === 0}
-        >
-          {isSubmitting ? "Adding..." : "Add item"}
-        </button>
-      </form>
+          <button
+            type="submit"
+            className="button button--primary button--sm"
+            disabled={isSubmitting || itemText.trim().length === 0}
+          >
+            {isSubmitting ? "Adding..." : "Add item"}
+          </button>
+        </form>
+      )}
 
       {notice ? <div className="message message--success">{notice}</div> : null}
 
@@ -232,7 +236,7 @@ export const TravelChecklistPanel = ({
                     ? `Mark ${item.item} as incomplete`
                     : `Mark ${item.item} as completed`
                 }
-                disabled={togglingItemId === item.id}
+                disabled={isReadOnly || togglingItemId === item.id}
                 onClick={() => toggleChecklist(item)}
               >
                 <span aria-hidden="true">
@@ -253,7 +257,7 @@ export const TravelChecklistPanel = ({
                     ? `Mark ${item.item} as incomplete`
                     : `Mark ${item.item} as completed`
                 }
-                disabled={togglingItemId === item.id}
+                disabled={isReadOnly || togglingItemId === item.id}
               >
                 <h5>{item.item}</h5>
                 <span className="checklist-item__status">
@@ -268,14 +272,16 @@ export const TravelChecklistPanel = ({
                 </p>
               </button>
 
-              <button
-                type="button"
-                className="button button--secondary button--sm checklist-item__delete"
-                onClick={() => setItemPendingDelete(item)}
-                disabled={togglingItemId === item.id}
-              >
-                Delete
-              </button>
+              {!isReadOnly && (
+                <button
+                  type="button"
+                  className="button button--secondary button--sm checklist-item__delete"
+                  onClick={() => setItemPendingDelete(item)}
+                  disabled={togglingItemId === item.id}
+                >
+                  Delete
+                </button>
+              )}
             </article>
           ))
         ) : (

@@ -13,7 +13,9 @@ type TravelExpensePanelProps = {
   travelId: string;
   plannedBudget: number;
   refreshKey?: number;
+  onBudgetChanged?: () => void;
   onRefresh?: () => Promise<void> | void;
+  isReadOnly?: boolean;
 };
 
 type ExpenseCategoryOption = {
@@ -40,7 +42,9 @@ export const TravelExpensePanel = ({
   travelId,
   plannedBudget,
   refreshKey,
+  onBudgetChanged,
   onRefresh,
+  isReadOnly = false,
 }: TravelExpensePanelProps) => {
   const [summary, setSummary] = useState<TravelBudgetSummaryDto | null>(null);
   const [expenses, setExpenses] = useState<ExpenseDto[]>([]);
@@ -48,8 +52,6 @@ export const TravelExpensePanel = ({
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [expensePendingDelete, setExpensePendingDelete] =
-    useState<ExpenseDto | null>(null);
   const [formState, setFormState] = useState<CreateExpenseDto>({
     name: "",
     category: 5 as unknown as ExpenseCategory,
@@ -136,7 +138,6 @@ export const TravelExpensePanel = ({
   useEffect(() => {
     setSummary(null);
     setExpenses([]);
-    setExpensePendingDelete(null);
     setFormState({
       name: "",
       category: 5 as unknown as ExpenseCategory,
@@ -176,6 +177,7 @@ export const TravelExpensePanel = ({
 
       showNotice("Expense added successfully.");
       await loadBudgetAndExpenses();
+      onBudgetChanged?.();
       if (onRefresh) {
         void onRefresh();
       }
@@ -187,28 +189,6 @@ export const TravelExpensePanel = ({
       );
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const confirmDeleteExpense = async () => {
-    if (!expensePendingDelete) {
-      return;
-    }
-
-    try {
-      await expenseApi.deleteExpense(travelId, expensePendingDelete.id);
-      setExpensePendingDelete(null);
-      showNotice("Expense deleted successfully.");
-      await loadBudgetAndExpenses();
-      if (onRefresh) {
-        void onRefresh();
-      }
-    } catch (deleteError) {
-      console.error("Failed to delete expense", deleteError);
-      showError(
-        getApiErrorMessage(deleteError) ||
-          "Expense could not be deleted. Please try again.",
-      );
     }
   };
 
@@ -274,107 +254,109 @@ export const TravelExpensePanel = ({
         </span>
       </div>
 
-      <form className="expense-panel__form" onSubmit={handleSubmit}>
-        <div className="form-grid form-grid--two">
+      {!isReadOnly && (
+        <form className="expense-panel__form" onSubmit={handleSubmit}>
+          <div className="form-grid form-grid--two">
+            <div className="field">
+              <label htmlFor="expense-name">Name</label>
+              <input
+                id="expense-name"
+                value={formState.name}
+                onChange={(event) =>
+                  setFormState((current) => ({
+                    ...current,
+                    name: event.target.value,
+                  }))
+                }
+                placeholder="Taxi, hotel, groceries..."
+                required
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="expense-category">Category</label>
+              <select
+                id="expense-category"
+                value={formState.category}
+                onChange={(event) =>
+                  setFormState((current) => ({
+                    ...current,
+                    category: Number(
+                      event.target.value,
+                    ) as unknown as ExpenseCategory,
+                  }))
+                }
+              >
+                {expenseCategoryOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="form-grid form-grid--two">
+            <div className="field">
+              <label htmlFor="expense-date">Date</label>
+              <input
+                id="expense-date"
+                type="date"
+                value={formState.expenseDate}
+                onChange={(event) =>
+                  setFormState((current) => ({
+                    ...current,
+                    expenseDate: event.target.value,
+                  }))
+                }
+                required
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="expense-amount">Amount</label>
+              <input
+                id="expense-amount"
+                type="number"
+                min={0}
+                step="0.01"
+                value={formState.amount}
+                onChange={(event) =>
+                  setFormState((current) => ({
+                    ...current,
+                    amount: Number(event.target.value),
+                  }))
+                }
+                required
+              />
+            </div>
+          </div>
+
           <div className="field">
-            <label htmlFor="expense-name">Name</label>
-            <input
-              id="expense-name"
-              value={formState.name}
+            <label htmlFor="expense-description">Description</label>
+            <textarea
+              id="expense-description"
+              rows={3}
+              value={formState.description}
               onChange={(event) =>
                 setFormState((current) => ({
                   ...current,
-                  name: event.target.value,
+                  description: event.target.value,
                 }))
               }
-              placeholder="Taxi, hotel, groceries..."
-              required
+              placeholder="Optional notes about this cost"
             />
           </div>
 
-          <div className="field">
-            <label htmlFor="expense-category">Category</label>
-            <select
-              id="expense-category"
-              value={formState.category}
-              onChange={(event) =>
-                setFormState((current) => ({
-                  ...current,
-                  category: Number(
-                    event.target.value,
-                  ) as unknown as ExpenseCategory,
-                }))
-              }
-            >
-              {expenseCategoryOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="form-grid form-grid--two">
-          <div className="field">
-            <label htmlFor="expense-date">Date</label>
-            <input
-              id="expense-date"
-              type="date"
-              value={formState.expenseDate}
-              onChange={(event) =>
-                setFormState((current) => ({
-                  ...current,
-                  expenseDate: event.target.value,
-                }))
-              }
-              required
-            />
-          </div>
-
-          <div className="field">
-            <label htmlFor="expense-amount">Amount</label>
-            <input
-              id="expense-amount"
-              type="number"
-              min={0}
-              step="0.01"
-              value={formState.amount}
-              onChange={(event) =>
-                setFormState((current) => ({
-                  ...current,
-                  amount: Number(event.target.value),
-                }))
-              }
-              required
-            />
-          </div>
-        </div>
-
-        <div className="field">
-          <label htmlFor="expense-description">Description</label>
-          <textarea
-            id="expense-description"
-            rows={3}
-            value={formState.description}
-            onChange={(event) =>
-              setFormState((current) => ({
-                ...current,
-                description: event.target.value,
-              }))
-            }
-            placeholder="Optional notes about this cost"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="button button--primary button--sm"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Saving..." : "Add expense"}
-        </button>
-      </form>
+          <button
+            type="submit"
+            className="button button--primary button--sm"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Saving..." : "Add expense"}
+          </button>
+        </form>
+      )}
 
       {notice ? <div className="message message--success">{notice}</div> : null}
 
@@ -406,14 +388,6 @@ export const TravelExpensePanel = ({
 
                 {expense.description ? <p>{expense.description}</p> : null}
               </div>
-
-              <button
-                type="button"
-                className="button button--secondary button--sm expense-item__delete"
-                onClick={() => setExpensePendingDelete(expense)}
-              >
-                Delete
-              </button>
             </article>
           ))
         ) : (
@@ -423,60 +397,6 @@ export const TravelExpensePanel = ({
           </div>
         )}
       </div>
-
-      {expensePendingDelete ? (
-        <div
-          className="modal-backdrop"
-          role="presentation"
-          onClick={() => setExpensePendingDelete(null)}
-        >
-          <div
-            className="modal-card"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="expense-delete-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="modal-card__header">
-              <div>
-                <h2 id="expense-delete-title">Delete expense</h2>
-                <p>
-                  Are you sure you want to delete {expensePendingDelete.name}?
-                </p>
-              </div>
-
-              <button
-                type="button"
-                className="modal-card__close"
-                onClick={() => setExpensePendingDelete(null)}
-                aria-label="Close modal"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="stack">
-              <p>This action cannot be undone.</p>
-              <div className="form-grid form-grid--two">
-                <button
-                  type="button"
-                  className="button button--secondary"
-                  onClick={() => setExpensePendingDelete(null)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="button button--primary"
-                  onClick={confirmDeleteExpense}
-                >
-                  Delete expense
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </section>
   );
 };

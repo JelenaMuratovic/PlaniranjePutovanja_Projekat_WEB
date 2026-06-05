@@ -15,6 +15,7 @@ type DestinationCardProps = {
   onAddActivity?: (destination: DestinationDto) => void;
   onEdit?: (destination: DestinationDto) => void;
   onDelete?: (destination: DestinationDto) => void;
+  isReadOnly?: boolean;
 };
 
 export const DestinationCard = ({
@@ -23,6 +24,7 @@ export const DestinationCard = ({
   onAddActivity,
   onEdit,
   onDelete,
+  isReadOnly = false,
 }: DestinationCardProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -51,53 +53,56 @@ export const DestinationCard = ({
           <h4 className="destination-card__title">{destination.name}</h4>
         </div>
 
-        <div ref={menuRef} className="travel-card__menu-wrap">
-          <button
-            type="button"
-            className="travel-card__menu"
-            aria-label={`Actions for ${destination.name}`}
-            aria-expanded={isMenuOpen}
-            aria-haspopup="menu"
-            onClick={() => setIsMenuOpen((current) => !current)}
-          >
-            ...
-          </button>
+        {!isReadOnly && (
+          <div ref={menuRef} className="travel-card__menu-wrap">
+            <button
+              type="button"
+              className="travel-card__menu"
+              aria-label={`Actions for ${destination.name}`}
+              aria-expanded={isMenuOpen}
+              aria-haspopup="menu"
+              onClick={() => setIsMenuOpen((current) => !current)}
+            >
+              ...
+            </button>
 
-          {isMenuOpen ? (
-            <div role="menu" className="travel-card__menu-panel">
-              <button
-                type="button"
-                role="menuitem"
-                className="travel-card__menu-item"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  onEdit?.(destination);
-                }}
-              >
-                <span aria-hidden="true">✎</span>
-                <span>Edit</span>
-              </button>
+            {isMenuOpen ? (
+              <div role="menu" className="travel-card__menu-panel">
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="travel-card__menu-item"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onEdit?.(destination);
+                  }}
+                >
+                  <span aria-hidden="true">✎</span>
+                  <span>Edit</span>
+                </button>
 
-              <button
-                type="button"
-                role="menuitem"
-                className="travel-card__menu-item travel-card__menu-item--danger"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  onDelete?.(destination);
-                }}
-              >
-                <span aria-hidden="true">🗑</span>
-                <span>Delete</span>
-              </button>
-            </div>
-          ) : null}
-        </div>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="travel-card__menu-item travel-card__menu-item--danger"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onDelete?.(destination);
+                  }}
+                >
+                  <span aria-hidden="true">🗑</span>
+                  <span>Delete</span>
+                </button>
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
 
       {schedule ? (
         <p className="destination-card__range">
-          {formatDateOnly(schedule.startDate)} - {formatDateOnly(schedule.endDate)}
+          {formatDateOnly(schedule.startDate)} -{" "}
+          {formatDateOnly(schedule.endDate)}
         </p>
       ) : null}
 
@@ -115,13 +120,15 @@ export const DestinationCard = ({
           <strong>{destination.activityCount}</strong>
         </div>
 
-        <button
-          type="button"
-          className="button button--secondary button--sm destination-card__action"
-          onClick={() => onAddActivity?.(destination)}
-        >
-          + Add activity
-        </button>
+        {!isReadOnly && (
+          <button
+            type="button"
+            className="button button--secondary button--sm destination-card__action"
+            onClick={() => onAddActivity?.(destination)}
+          >
+            + Add activity
+          </button>
+        )}
       </div>
     </article>
   );

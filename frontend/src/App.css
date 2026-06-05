@@ -502,10 +502,6 @@
   line-height: 1.55;
 }
 
-.expense-item__delete {
-  min-width: 92px;
-}
-
 .travel-workspace__grid {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
@@ -1713,4 +1709,11 @@
   .auth-hero__title {
     font-size: 2rem;
   }
+}
+
+.frontend-read-only-view button,
+.frontend-read-only-view input,
+.frontend-read-only-view .action-buttons,
+.frontend-read-only-view .add-button {
+  display: none !important;
 }

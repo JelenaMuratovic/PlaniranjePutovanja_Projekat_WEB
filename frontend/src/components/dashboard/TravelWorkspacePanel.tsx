@@ -27,10 +27,14 @@ import type {
   CreateActivityDto,
 } from "../../models/travel/activity/dtos";
 import type { TravelBudgetSummaryDto } from "../../models/expense";
+import { utilApi } from "../../api/util/utilApi";
+import { ShareTravelModal } from "../travel/ShareTravelModal";
+import TravelMapPanel from "../map/TravelMapPanel";
 
 type TravelWorkspacePanelProps = {
   travel: TravelDto;
   onRefresh?: () => Promise<void> | void;
+  isReadOnly?: boolean;
 };
 
 type DestinationSchedule = DestinationDto & {
@@ -50,6 +54,7 @@ const formatDateRange = (startDate: string, endDate: string): string => {
 export const TravelWorkspacePanel = ({
   travel,
   onRefresh,
+  isReadOnly = false,
 }: TravelWorkspacePanelProps) => {
   const [activeTab, setActiveTab] = useState<
     "details" | "destinations" | "activities" | "expenses" | "map" | "checklist"
@@ -85,6 +90,8 @@ export const TravelWorkspacePanel = ({
   const [budgetSummaryError, setBudgetSummaryError] = useState<string | null>(
     null,
   );
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
   const [activitiesByDestination, setActivitiesByDestination] = useState<
     Record<string, ActivityDto[]>
   >({});
@@ -141,6 +148,10 @@ export const TravelWorkspacePanel = ({
 
   const clearBudgetSummaryError = () => {
     setBudgetSummaryError(null);
+  };
+
+  const requestBudgetSummaryRefresh = () => {
+    setBudgetRefreshKey((current) => current + 1);
   };
 
   useEffect(
@@ -293,6 +304,32 @@ export const TravelWorkspacePanel = ({
     void loadActivities();
   }, [travel.id, destinations, destinationsTravelId]);
 
+  const handleExportPdf = async () => {
+    setPdfLoading(true);
+    try {
+      const blob = await utilApi.exportPdf(travel.id);
+
+      // Pravimo privremeni link u pretrazivacu za preuzimanje binarnog fajla
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `${travel.name.replace(/\s+/g, "_")}_Plan.pdf`,
+      );
+      document.body.appendChild(link);
+      link.click();
+
+      // Cistimo privremene objekte iz memorije
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert(getApiErrorMessage(err));
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
   const handleAddDestination = async (values: CreateDestinationDto) => {
     try {
       setDestinationError(null);
@@ -350,24 +387,26 @@ export const TravelWorkspacePanel = ({
           values,
         );
       }
-
-      setActivityDestination(null);
-      setActivityBeingEdited(null);
-      showDestinationNotice(
-        activityBeingEdited
-          ? "Activity updated successfully."
-          : "Activity added successfully.",
-      );
-      setBudgetRefreshKey((current) => current + 1);
+      requestBudgetSummaryRefresh();
       await loadDestinations();
       await loadActivities();
       if (onRefresh) {
         void onRefresh();
       }
+      showDestinationNotice(
+        activityBeingEdited
+          ? "Activity updated successfully."
+          : "Activity added successfully.",
+      );
+
+      setActivityDestination(null);
+      setActivityBeingEdited(null);
+
       setActiveTab("activities");
     } catch (error) {
       // Debugging
       console.error("Failed to add activity", error);
+
       showActivityError(
         getApiErrorMessage(error) ||
           "Activity could not be saved. Please try again.",
@@ -439,7 +478,7 @@ export const TravelWorkspacePanel = ({
         setActivityDestination(null);
       }
       showDestinationNotice("Destination deleted successfully.");
-      setBudgetRefreshKey((current) => current + 1);
+      requestBudgetSummaryRefresh();
       await loadDestinations();
       if (onRefresh) {
         void onRefresh();
@@ -661,12 +700,23 @@ export const TravelWorkspacePanel = ({
               style={{ marginTop: 12 }}
               className="travel-workspace__actions"
             >
-              <button type="button" className="button button--primary">
-                Export PDF
+              <button
+                type="button"
+                className="button button--primary"
+                onClick={handleExportPdf}
+                disabled={pdfLoading}
+              >
+                {pdfLoading ? "Exporting PDF..." : "Export PDF"}
               </button>
-              <button type="button" className="button button--secondary">
-                Generate QR
-              </button>
+              {!isReadOnly && (
+                <button
+                  type="button"
+                  className="button button--secondary"
+                  onClick={() => setIsShareModalOpen(true)}
+                >
+                  Generate QR
+                </button>
+              )}
             </div>
 
             <div style={{ marginTop: 12 }}>
@@ -707,15 +757,17 @@ export const TravelWorkspacePanel = ({
 
         {activeTab === "destinations" && (
           <section className="app-card travel-workspace__section">
-            <div className="section-heading section-heading--inline">
-              <button
-                type="button"
-                className="button button--primary button--sm"
-                onClick={openDestinationCreateModal}
-              >
-                + Add destination
-              </button>
-            </div>
+            {!isReadOnly && (
+              <div className="section-heading section-heading--inline">
+                <button
+                  type="button"
+                  className="button button--primary button--sm"
+                  onClick={openDestinationCreateModal}
+                >
+                  + Add destination
+                </button>
+              </div>
+            )}
 
             {destinationNotice ? (
               <div className="message message--success">
@@ -738,6 +790,7 @@ export const TravelWorkspacePanel = ({
                   <DestinationCard
                     key={destination.id}
                     destination={destination}
+                    isReadOnly={isReadOnly}
                     schedule={destinationSchedules.find(
                       (schedule) => schedule.id === destination.id,
                     )}
@@ -815,21 +868,33 @@ export const TravelWorkspacePanel = ({
               travelId={travel.id}
               plannedBudget={travel.budget}
               refreshKey={budgetRefreshKey}
+              onBudgetChanged={requestBudgetSummaryRefresh}
               onRefresh={onRefresh}
+              isReadOnly={isReadOnly}
             />
           </section>
         )}
 
         {activeTab === "map" && (
           <section className="app-card travel-workspace__section travel-workspace__section--map">
-            <div className="section-heading"></div>
-            <div className="travel-workspace__map-frame" />
+            <div className="section-heading">
+              <h2 className="section-title">Trip Route & Timeline</h2>
+            </div>
+            {/* <div className="travel-workspace__map-frame" /> */}
+            <TravelMapPanel
+              destinations={destinations}
+              activitiesByDestination={activitiesByDestination}
+            />
           </section>
         )}
 
         {activeTab === "checklist" && (
           <section className="app-card travel-workspace__section">
-            <TravelChecklistPanel travelId={travel.id} onRefresh={onRefresh} />
+            <TravelChecklistPanel
+              travelId={travel.id}
+              onRefresh={onRefresh}
+              isReadOnly={isReadOnly}
+            />
           </section>
         )}
       </div>
@@ -935,6 +1000,14 @@ export const TravelWorkspacePanel = ({
             </div>
           </div>
         </Modal>
+      ) : null}
+
+      {isShareModalOpen ? (
+        <ShareTravelModal
+          travelId={travel.id}
+          travelName={travel.name}
+          onClose={() => setIsShareModalOpen(false)}
+        />
       ) : null}
     </div>
   );

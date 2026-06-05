@@ -41,7 +41,16 @@ export const LoginPage = () => {
       }
 
       login(response);
-      navigate(from, { replace: true });
+      // dodala
+      const redirectTo = sessionStorage.getItem("redirectAfterLogin");
+      if (redirectTo) {
+        sessionStorage.removeItem("redirectAfterLogin");
+        // Preusmeravamo ga direktno na sacuvani URL deljenog putovanja
+        navigate(redirectTo, { replace: true });
+      } else {
+        // Ako nije dosao preko QR koda, ide na dashboard ili odatle odakle je dosao
+        navigate(from, { replace: true });
+      }
     } catch (error) {
       setServerMessage(getApiErrorMessage(error));
     }
