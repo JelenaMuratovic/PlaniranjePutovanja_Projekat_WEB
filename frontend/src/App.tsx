@@ -9,6 +9,7 @@ import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { PublicOnlyRoute } from "./routes/PublicOnlyRoute";
 import "./App.css";
 import { SharedTravelPage } from "./pages/SharedTravelPage";
+import { UserManagementPage } from "./pages/UserManagementPage";
 
 function App() {
   const { isAuthenticated, loading } = useAuth();
@@ -43,6 +44,11 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+        </Route>
+      </Route>
+      <Route element={<ProtectedRoute allowedRoles={["Admin"]} />}>
+        <Route element={<AppLayout />}>
+          <Route path="/admin/users" element={<UserManagementPage />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
