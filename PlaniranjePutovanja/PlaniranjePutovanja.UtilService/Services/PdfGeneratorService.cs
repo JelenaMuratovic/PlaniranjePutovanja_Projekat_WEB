@@ -63,7 +63,7 @@ namespace PlaniranjePutovanja.UtilService.Services
                                 column.Item().Text($"Planiran budžet: {budgetSummary.PlannedBudget}€");
                                 column.Item().Text($"Ukupno potrošeno: {budgetSummary.TotalExpenses}€");
                                 column.Item().Text($"Preostalo: {budgetSummary.RemainingBudget}€");
-                                column.Item().Text($"Utošeno: {budgetSummary.SpentPercentage:F2}%");
+                                column.Item().Text($"Utrošeno: {budgetSummary.SpentPercentage:F2}%");
                             });
 
                             page.Footer().AlignCenter().Text($"Kreirano: {DateTime.Now:dd.MM.yyyy HH:mm:ss}");

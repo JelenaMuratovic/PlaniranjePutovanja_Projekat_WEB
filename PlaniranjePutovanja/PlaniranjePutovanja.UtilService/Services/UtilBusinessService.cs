@@ -1,4 +1,5 @@
-﻿using PlaniranjePutovanja.Common.DTOs.Util;
+﻿using PlaniranjePutovanja.Common.DTOs.Travel;
+using PlaniranjePutovanja.Common.DTOs.Util;
 using PlaniranjePutovanja.UtilService.Clients;
 using System;
 using System.Collections.Generic;
@@ -73,8 +74,8 @@ namespace PlaniranjePutovanja.UtilService.Services
                 request.AccessLevel,
                 request.ExpirationDays);
 
-            // URL koji ce biti u QR kodu (naprimer localhost ili production URL)
-            var targetUrl = $"http://localhost:8081/api/util/shared?token={shareToken}";
+            // URL vodi na novu React stranicu
+            var targetUrl = $"http://localhost:5173/shared-travel?token={shareToken}";
 
             // Generise QR kod
             var qrCodeImage = await _qrCodeGeneratorService.GenerateQrCodeAsync(targetUrl);
@@ -89,6 +90,36 @@ namespace PlaniranjePutovanja.UtilService.Services
                     ContentType = "image/png",
                     FileName = $"share_qr_{travelId}.png"
                 }
+            };
+        }
+
+        public async Task<TravelDto> GetSharedTravelByTokenAsync(string token)
+        {
+            var tokenData = await _shareTokenService.ValidateShareTokenAsync(token);
+            if (tokenData == null)
+            {
+                return null; // Token nije validan ili je istekao
+            }
+
+            var travelId = tokenData.Value.TravelId;
+
+            var travel = await _travelServiceClient.GetTravelByIdAsync(travelId);
+            return travel;
+        }
+
+        public async Task<ShareTokenValidationDto?> ValidateShareTokenAsync(string token)
+        {
+            var tokenData = await _shareTokenService.ValidateShareTokenAsync(token);
+
+            if (tokenData == null)
+            {
+                return null;
+            }
+
+            return new ShareTokenValidationDto
+            {
+                TravelId = tokenData.Value.TravelId,
+                AccessLevel = tokenData.Value.AccessLevel
             };
         }
     }

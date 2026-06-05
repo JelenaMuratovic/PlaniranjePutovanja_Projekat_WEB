@@ -39,12 +39,14 @@ namespace PlaniranjePutovanja.ExpenseService.Models
         /// Ako je null, ovo je rucni trosak. Ako ima vrednost, trosak je automatski kreiran iz aktivnosti, kao cena aktivnosti
         /// Koristi se kao referenca na aktivnost iz koje je trosak kreiran, kako bi se mogao povezati sa aktivnoscu i automatski azurirati ako se aktivnost azurira
         /// </summary>
+        [DataMember]
         public string? ActivityId { get; set; }
 
         /// <summary>
         /// true → sistemski trosak iz aktivnosti
         /// false → rucni trosak
         /// </summary>
+        [DataMember]
         public bool IsSystemGenerated { get; set; }
     }
 }

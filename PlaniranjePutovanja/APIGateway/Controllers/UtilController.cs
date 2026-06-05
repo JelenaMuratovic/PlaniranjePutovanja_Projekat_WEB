@@ -54,6 +54,31 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Generate PDF failed.");
+                //return ApiExceptionMapper.MapException(this, ex);
+                return StatusCode(500, new { error = ex.Message, stack = ex.StackTrace, inner = ex.InnerException?.Message });
+            }
+        }
+
+        [HttpGet("shared")]
+        [AllowAnonymous] // Omogucava neulogovanim korisnicima (gostima) pristup
+        public async Task<IActionResult> GetSharedTravel([FromQuery] string token)
+        {
+            try
+            { 
+                // Metoda na UtilService-u koja prima token, validira ga, 
+                // i ako je ispravan, sama povuce TravelDto i vrati ga kontroleru
+
+                var travelDto = await _utilService.GetSharedTravelByTokenAsync(token);
+                if (travelDto == null)
+                {
+                    return BadRequest(new { error = "Link za deljenje je nevalidan ili je istekao." });
+                }
+
+                return Ok(travelDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Greška prilikom preuzimanja deljenog putovanja.");
                 return ApiExceptionMapper.MapException(this, ex);
             }
         }

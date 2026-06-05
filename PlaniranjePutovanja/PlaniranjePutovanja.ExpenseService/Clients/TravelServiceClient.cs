@@ -15,34 +15,19 @@ namespace PlaniranjePutovanja.ExpenseService.Clients
 
         private ITravelService GetProxy()
         {
-            return ServiceProxy.Create<ITravelService>(_travelServiceUri, new Microsoft.ServiceFabric.Services.Client.ServicePartitionKey(0));
+            return ServiceProxy.Create<ITravelService>(_travelServiceUri);
         }
 
         public async Task<IEnumerable<TravelDto>> GetAllTravelsAsync()
         {
-            try
-            {
-                var proxy = GetProxy();
-                return await proxy.GetAllTravelsAsync();
-            }
-            catch (Exception)
-            {
-                // Fallback ako servis ne radi
-                return Array.Empty<TravelDto>();
-            }
+            var proxy = GetProxy();
+            return await proxy.GetAllTravelsAsync();
         }
 
         public async Task<TravelDto?> GetTravelByIdAsync(string travelId)
         {
-            try
-            {
-                var proxy = GetProxy();
-                return await proxy.GetTravelByIdAsync(travelId);
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            var proxy = GetProxy();
+            return await proxy.GetTravelByIdAsync(travelId);
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 using PlaniranjePutovanja.UtilService.DependencyInjection;
+using QuestPDF.Infrastructure;
 
 namespace PlaniranjePutovanja.UtilService
 {
@@ -22,6 +23,7 @@ namespace PlaniranjePutovanja.UtilService
                 // Registering a service maps a service type name to a .NET type.
                 // When Service Fabric creates an instance of this service type,
                 // an instance of the class is created in this host process.
+                QuestPDF.Settings.License = LicenseType.Community;
 
                 ServiceRuntime.RegisterServiceAsync("PlaniranjePutovanja.UtilServiceType",
                     context => 

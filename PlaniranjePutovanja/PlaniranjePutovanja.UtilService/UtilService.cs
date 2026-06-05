@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
+using PlaniranjePutovanja.Common.DTOs.Travel;
 using PlaniranjePutovanja.Common.DTOs.Util;
 using PlaniranjePutovanja.Common.Interfaces.Util;
 using PlaniranjePutovanja.UtilService.Services;
@@ -48,6 +49,19 @@ namespace PlaniranjePutovanja.UtilService
             using var scope = _scopeFactory.CreateScope();
             var util = scope.ServiceProvider.GetRequiredService<IUtilBusinessService>();
             return await util.GenerateShareQrCodeAsync(travelId, request);
+        }
+
+        public async Task<TravelDto> GetSharedTravelByTokenAsync(string token)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var util = scope.ServiceProvider.GetRequiredService<IUtilBusinessService>();
+            return await util.GetSharedTravelByTokenAsync(token);
+        }
+        public async Task<ShareTokenValidationDto?> ValidateShareTokenAsync(string token)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var util = scope.ServiceProvider.GetRequiredService<IUtilBusinessService>();
+            return await util.ValidateShareTokenAsync(token);
         }
 
         protected override async Task RunAsync(CancellationToken cancellationToken)

@@ -12,7 +12,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class TravelController : ControllerBase
     {
         private readonly ITravelService _travelService;
@@ -26,6 +26,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
 
         // Endpoints putovanja
         [HttpPost("travels")]
+        [Authorize]
         public async Task<IActionResult> CreateTravel([FromBody] CreateTravelDto request)
         {
             try
@@ -82,6 +83,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
         }
 
         [HttpGet("travels")]
+        [Authorize]
         public async Task<IActionResult> GetAllTravels()
         {
             try

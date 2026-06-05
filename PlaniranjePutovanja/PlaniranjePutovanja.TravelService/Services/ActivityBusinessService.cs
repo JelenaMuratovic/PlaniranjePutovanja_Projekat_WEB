@@ -49,7 +49,7 @@ namespace PlaniranjePutovanja.TravelService.Services
                 throw new ValidationException(validationResult.Errors);
             }
 
-            //dodah
+            //dodala
             var travel = await _travelRepository.GetByIdAsync(travelId, cancellationToken);
             if (travel == null)
             {
@@ -210,30 +210,29 @@ namespace PlaniranjePutovanja.TravelService.Services
             await _activityRepository.UpdateAsync(activity, cancellationToken);
 
             // Sinhronizujemo cenu sa sistemskim troskom
-            if (oldPrice != dto.Price)
+            
+            try
             {
-                try
+                if (dto.Price > 0)
                 {
-                    if (dto.Price != 0 && dto.Price > 0)
-                    {
-                        // Ako nova cena postoji, azuriramo trosak
-                        await _activityExpenseClient.UpdateActivityExpenseAsync(
-                            travelId,
-                            id,
-                            dto.Price);
-                    }
-                    else if (oldPrice != 0 && oldPrice > 0 && (dto.Price == 0))
-                    {
-                        // Ako je stara cena bila > 0 a nova je 0, obrisemo trosak
-                        await _activityExpenseClient.DeleteActivityExpenseAsync(travelId, id);
-                    }
+                    // Ako nova cena postoji, azuriramo trosak
+                    await _activityExpenseClient.UpdateActivityExpenseAsync(
+                        travelId,
+                        id,
+                        dto.Price);
                 }
-                catch (Exception ex)
+                else if (oldPrice > 0 && (dto.Price == 0))
                 {
-                    throw new InvalidOperationException(
-                        $"Activity updated but failed to sync expense.", ex);
+                    // Ako je stara cena bila > 0 a nova je 0, obrisemo trosak
+                    await _activityExpenseClient.DeleteActivityExpenseAsync(travelId, id);
                 }
             }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(
+                    $"Activity updated but failed to sync expense.", ex);
+            }
+            
             return _travelMapper.ToActivityDto(activity);
         }
     }

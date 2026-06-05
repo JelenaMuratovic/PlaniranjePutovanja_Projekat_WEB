@@ -38,7 +38,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Register failed.");
-                return StatusCode(500, $"Error: {ex.Message}");
+                return StatusCode(500, new { error = "The server could not complete the request right now." });
             }
         }
 
@@ -59,7 +59,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Login failed.");
-                return StatusCode(500, $"Error: {ex.Message}");
+                return StatusCode(500, new { error = "The server could not complete the request right now." });
             }
         }
 
@@ -76,7 +76,7 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to get all users.");
-                return StatusCode(500, $"Error: {ex.Message}");
+                return StatusCode(500, new { error = "The server could not complete the request right now." });
             }
         }
 
@@ -91,12 +91,12 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
                 {
                     return NoContent();
                 }
-                return NotFound($"User with ID {userId} not found.");
+                return NotFound(new { error = "The requested user could not be found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to delete user.");
-                return StatusCode(500, $"Error: {ex.Message}");
+                return StatusCode(500, new { error = "The server could not complete the request right now." });
             }
         }
     }
