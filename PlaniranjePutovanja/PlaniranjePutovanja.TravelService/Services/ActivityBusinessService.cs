@@ -154,22 +154,23 @@ namespace PlaniranjePutovanja.TravelService.Services
                 throw new UnauthorizedAccessException("The destination does not belong to the specified travel, so you cannot delete the activity for it.");
             }
 
+            //await _activityRepository.DeleteAsync(id, cancellationToken);
+            await _activityExpenseClient.DeleteActivityExpenseAsync(travelId, id);
             await _activityRepository.DeleteAsync(id, cancellationToken);
-
             // Obrisemo povezani sistemski trosak
-            if (activity.Price != 0 && activity.Price > 0)
-            {
-                try
-                {
-                    await _activityExpenseClient.DeleteActivityExpenseAsync(travelId, id);
-                }
-                catch (Exception ex)
-                {
-                    // Ne prekidamo brisanje — aktivnost je vec obrisana
-                    throw new InvalidOperationException(
-                        $"Activity deleted but failed to delete related expense.", ex);
-                }
-            }
+            //if (activity.Price != 0 && activity.Price > 0)
+            //{
+            //    try
+            //    {
+            //        await _activityExpenseClient.DeleteActivityExpenseAsync(travelId, id);
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        // Ne prekidamo brisanje — aktivnost je vec obrisana
+            //        throw new InvalidOperationException(
+            //            $"Activity deleted but failed to delete related expense.", ex);
+            //    }
+            //}
             return true;
         }
 

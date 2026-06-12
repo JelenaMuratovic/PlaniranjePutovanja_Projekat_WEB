@@ -116,6 +116,13 @@ namespace PlaniranjePutovanja.ExpenseService.Services
             }
             var travel = await GetExistingTravelAsync(travelId);
 
+            if (dto.ExpenseDate < travel.StartDate || dto.ExpenseDate > travel.EndDate)
+            {
+                throw new ArgumentException(
+                    $"Expense date must be within the travel period ({travel.StartDate:yyyy-MM-dd} to {travel.EndDate:yyyy-MM-dd})."
+                );
+            }
+
             // Trajni upis u SQL bazu
             var expense = _expenseMapper.ToExpense(dto);
             expense.TravelId = travelId;
@@ -234,12 +241,33 @@ namespace PlaniranjePutovanja.ExpenseService.Services
 
         public async Task RemoveSystemGeneratedExpenseAsync(string travelId, string expenseId, CancellationToken cancellationToken = default)
         {
+            //var travel = await GetExistingTravelAsync(travelId);
+            //var budgetCollection = await GetCollectionAsync();
+            //using var tx = _stateManager.CreateTransaction();
+
+            //await budgetCollection.TryGetValueAsync(tx, travelId, LockMode.Update);
+            //await RefreshStateAsync(budgetCollection, tx, travel, cancellationToken);
+
+            //await tx.CommitAsync();
             var travel = await GetExistingTravelAsync(travelId);
             var budgetCollection = await GetCollectionAsync();
             using var tx = _stateManager.CreateTransaction();
 
-            await budgetCollection.TryGetValueAsync(tx, travelId, LockMode.Update);
-            await RefreshStateAsync(budgetCollection, tx, travel, cancellationToken);
+            var conditionalState = await budgetCollection.TryGetValueAsync(tx, travelId, LockMode.Update);
+
+            if (conditionalState.HasValue)
+            {
+                var state = conditionalState.Value;
+
+                state.Expenses = state.Expenses.Where(e => e.Id != expenseId).ToList();
+                state.LastUpdated = DateTime.UtcNow;
+
+                await budgetCollection.SetAsync(tx, travelId, state);
+            }
+            else
+            {
+                await RefreshStateAsync(budgetCollection, tx, travel, cancellationToken);
+            }
 
             await tx.CommitAsync();
         }
