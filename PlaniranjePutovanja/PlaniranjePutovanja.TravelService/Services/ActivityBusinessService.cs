@@ -16,7 +16,6 @@ namespace PlaniranjePutovanja.TravelService.Services
     {
         private readonly IDestinationRepository _destinationRepository;
         private readonly IActivityRepository _activityRepository;
-        //dodah
         private readonly ITravelRepository _travelRepository;
         private readonly ITravelMapper _travelMapper;
         private readonly IValidator<CreateActivityDto> _createActivityValidator;
@@ -49,7 +48,6 @@ namespace PlaniranjePutovanja.TravelService.Services
                 throw new ValidationException(validationResult.Errors);
             }
 
-            //dodala
             var travel = await _travelRepository.GetByIdAsync(travelId, cancellationToken);
             if (travel == null)
             {

@@ -46,11 +46,6 @@ namespace PlaniranjePutovanja.AuthService.Services
             _expenseServiceClient = expenseServiceClient;
         }
 
-        //public async Task<bool> CanRegisterAsync(string email, CancellationToken cancellationToken = default)
-        //{
-        //    return !await _userRepository.ExistsByEmailAsync(email, cancellationToken);
-        //}
-
         public async Task<AuthResponseDto> RegisterUserAsync(RegisterRequestDto request, CancellationToken cancellationToken = default)
         {
             var validationResult = await _registerValidator.ValidateAsync(request, cancellationToken);
@@ -119,12 +114,6 @@ namespace PlaniranjePutovanja.AuthService.Services
                 AccessToken = accessToken
             };
         }
-
-        //public async Task<UserDto?> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
-        //{
-        //    var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
-        //    return user == null ? null : _authMapper.MapToUserDto(user);
-        //}
 
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
         {

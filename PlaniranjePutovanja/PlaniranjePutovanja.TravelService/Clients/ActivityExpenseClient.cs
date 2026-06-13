@@ -28,7 +28,6 @@ namespace PlaniranjePutovanja.TravelService.Clients
             {
                 var proxy = GetProxy();
 
-                // Pozivamo custom metodu na ExpenseService-u
                 var expenseId = await proxy.CreateActivityExpenseAsync(travelId, activityId, activityName, price, plannedBudget);
                 return expenseId;
             }

@@ -12,7 +12,6 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
     public class TravelController : ControllerBase
     {
         private readonly ITravelService _travelService;

@@ -8,7 +8,6 @@ namespace PlaniranjePutovanja.Common.DTOs.Travel
 {
     public sealed class CreateChecklistDto
     {
-        //public string TravelId { get; set; } = string.Empty;
         public string Item { get; set; } = string.Empty;
     }
 }

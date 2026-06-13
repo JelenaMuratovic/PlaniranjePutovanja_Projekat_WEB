@@ -27,14 +27,13 @@ namespace PlaniranjePutovanja.APIGateway.Authorization
                 return;
             }
 
-            // 1. Pravilo: Admin moze SVE
+            // 1. Pravilo: Admin moze sve
             if (context.User.IsInRole("Admin"))
             {
                 context.Succeed(requirement);
                 return;
             }
 
-            // Izvuci ID ulogovanog korisnika iz tokena
             var currentUserId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
                                 context.User.FindFirst("userId")?.Value;
 
@@ -73,20 +72,20 @@ namespace PlaniranjePutovanja.APIGateway.Authorization
                 return;
             }
 
-            // PROVERA (KADA POSTOJI travelId U RUTI)
+            // Provera kada postoji tarvelId u ruti
             // Provera da li je obican korisnik vlasnik putovanja
             if (!string.IsNullOrEmpty(currentUserId))
             {
                 var travel = await _travelService.GetTravelByIdAsync(travelId);
                 if (travel != null && travel.UserId == currentUserId)
                 {
-                    // Vlasnik - Puna prava
+                    // Vlasnik - puna prava
                     context.Succeed(requirement);
                     return;
                 }
             }
 
-            // Proveri Share Token (citamo ga iz custom headera koji salje frontend)
+            // Proveravamo Share Token (citamo ga iz custom headera koji salje frontend)
             string? tokenTravelId = null;
             string? tokenAccessLevel = null;
 
@@ -112,7 +111,7 @@ namespace PlaniranjePutovanja.APIGateway.Authorization
             }
             else
             {
-                // Fallback na stari kod (ako su claimovi direktno u korisniku)
+                // Fallback ako su claimovi direktno u korisniku
                 tokenTravelId = context.User.FindFirst("TravelId")?.Value;
                 tokenAccessLevel = context.User.FindFirst("AccessLevel")?.Value;
             }

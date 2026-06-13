@@ -108,7 +108,6 @@ namespace PlaniranjePutovanja.ExpenseService.Services
 
         public async Task<ExpenseDto> AddExpenseAsync(string travelId, CreateExpenseDto dto, CancellationToken cancellationToken = default)
         {
-            // Validacija ulaza
             var validationResult = await _createExpenseValidator.ValidateAsync(dto, cancellationToken);
             if (!validationResult.IsValid)
             {
@@ -128,7 +127,6 @@ namespace PlaniranjePutovanja.ExpenseService.Services
             expense.TravelId = travelId;
             await _expenseRepository.AddAsync(expense, cancellationToken);
 
-            //var budgetCollection = await _stateManager.GetOrAddAsync<IReliableDictionary<string, BudgetState>>("budgets");
             var budgetCollection = await GetCollectionAsync();
             using var tx = _stateManager.CreateTransaction();
 
@@ -141,7 +139,6 @@ namespace PlaniranjePutovanja.ExpenseService.Services
 
         public async Task<TravelBudgetSummaryDto?> GetBudgetSummaryAsync(string travelId, CancellationToken cancellationToken = default)
         {
-            //var budgetCollection = await _stateManager.GetOrAddAsync<IReliableDictionary<string, BudgetState>>("budgets");
             var budgetCollection = await GetCollectionAsync();
             using var tx = _stateManager.CreateTransaction();
 
@@ -155,7 +152,6 @@ namespace PlaniranjePutovanja.ExpenseService.Services
 
         public async Task<IEnumerable<ExpenseDto>> GetExpensesByTravelIdAsync(string travelId, CancellationToken cancellationToken = default)
         {
-            //var budgetCollection = await _stateManager.GetOrAddAsync<IReliableDictionary<string, BudgetState>>("budgets");
             var budgetCollection = await GetCollectionAsync();
             using var tx = _stateManager.CreateTransaction();
 
@@ -184,7 +180,6 @@ namespace PlaniranjePutovanja.ExpenseService.Services
             await _expenseRepository.DeleteAsync(expenseId, cancellationToken);
 
             // Obrisemo iz recnika
-            //var budgetCollection = await _stateManager.GetOrAddAsync<IReliableDictionary<string, BudgetState>>("budgets");
             var budgetCollection = await GetCollectionAsync();
             using var tx = _stateManager.CreateTransaction();
 
@@ -271,27 +266,5 @@ namespace PlaniranjePutovanja.ExpenseService.Services
 
             await tx.CommitAsync();
         }
-
-        //public async Task PersistBudgetsAsync(CancellationToken cancellationToken = default)
-        //{
-        //    // Periodically ili na shutdown — sprema sve iz memorije u bazu
-        //    using var tx = _stateManager.CreateTransaction();
-
-        //    var enumerable = await _budgetCollection.CreateEnumerableAsync(tx);
-
-        //    using (var enumerator = enumerable.GetAsyncEnumerator())
-        //    {
-        //        while (await enumerator.MoveNextAsync(cancellationToken))
-        //        {
-        //            var budgetState = enumerator.Current.Value;
-
-        //            // Sve troskove spremi u bazu
-        //            foreach (var expense in budgetState.Expenses)
-        //            {
-        //                await _expenseRepository.AddOrUpdateAsync(expense, cancellationToken);
-        //            }
-        //        }
-        //    }
-        //}
     }
 }

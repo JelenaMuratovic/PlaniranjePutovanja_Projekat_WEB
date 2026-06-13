@@ -9,7 +9,6 @@ namespace PlaniranjePutovanja.Common.DTOs.Travel
 {
     public sealed class CreateActivityDto
     {
-        //public string DestinationId { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public DateTime ActivityDate { get; set; }

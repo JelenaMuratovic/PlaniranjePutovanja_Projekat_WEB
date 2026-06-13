@@ -10,7 +10,6 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
     public class ExpenseController : ControllerBase
     {
         private readonly IExpenseService _expenseService;

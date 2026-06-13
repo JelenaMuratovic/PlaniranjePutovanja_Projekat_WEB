@@ -103,7 +103,7 @@ namespace APIGateway
                                     .UseUrls(url);
                         builder.Services.AddControllers();
                         builder.Services.AddEndpointsApiExplorer();
-                        //builder.Services.AddSwaggerGen();
+                        
                         builder.Services.AddSwaggerGen(c =>
                         {
                             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Travel Planner API", Version = "v1" });

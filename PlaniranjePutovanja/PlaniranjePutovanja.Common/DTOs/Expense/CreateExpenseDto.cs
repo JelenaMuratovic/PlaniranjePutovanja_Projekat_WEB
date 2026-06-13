@@ -9,8 +9,6 @@ namespace PlaniranjePutovanja.Common.DTOs.Expense
 {
     public sealed class CreateExpenseDto
     {
-        //public string TravelId { get; set; } = string.Empty;
-
         public string Name { get; set; } = string.Empty;
 
         public ExpenseCategory Category { get; set; } = ExpenseCategory.Other;

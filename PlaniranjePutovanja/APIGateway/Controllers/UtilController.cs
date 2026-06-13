@@ -54,8 +54,8 @@ namespace PlaniranjePutovanja.APIGateway.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Generate PDF failed.");
-                //return ApiExceptionMapper.MapException(this, ex);
-                return StatusCode(500, new { error = ex.Message, stack = ex.StackTrace, inner = ex.InnerException?.Message });
+                return ApiExceptionMapper.MapException(this, ex);
+                //return StatusCode(500, new { error = ex.Message, stack = ex.StackTrace, inner = ex.InnerException?.Message });
             }
         }
 

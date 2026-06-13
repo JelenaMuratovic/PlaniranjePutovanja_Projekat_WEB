@@ -33,7 +33,7 @@ namespace PlaniranjePutovanja.AuthService.Persistence
                 entity.Property(e => e.Role).IsRequired();
                 entity.Property(e => e.CreatedAt).IsRequired().HasDefaultValueSql("GETUTCDATE()"); // SQL funkcija za trenutno vreme
                 entity.Property(e => e.IsActive).IsRequired().HasDefaultValue(true);
-                entity.Property(e => e.RefreshToken).HasMaxLength(500); // Refresh token je obicno Base64 string
+                entity.Property(e => e.RefreshToken).HasMaxLength(500); 
                 entity.Property(e => e.RefreshTokenExpiryTime).IsRequired(false);
                 entity.ToTable("Users");
             });
