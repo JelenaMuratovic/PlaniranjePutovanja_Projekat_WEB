@@ -183,7 +183,7 @@ export const DashboardPage = () => {
     <section className="dashboard-shell dashboard-shell--clean">
       {serverMessage ? (
         <div className="app-card dashboard-error" role="alert">
-          <strong>Server message:</strong>&nbsp;{serverMessage}
+          <strong></strong>&nbsp;{serverMessage}
         </div>
       ) : null}
 
